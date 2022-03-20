@@ -66,6 +66,7 @@ is no interesting activities occur between events.
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
 class Project3 {
@@ -75,6 +76,14 @@ class Project3 {
     public static void main(String[] args) {
         // Load the customer data:
         ArrayList<Customer> customerList = loadCustomers(dataFileName);
+
+        // Create a PriorityQueue for customer arrival times:
+        PriorityQueue<Customer> arrivalQueue = new PriorityQueue<>();
+
+        // Add customers to the arrival queue:
+        for (Customer c : customerList) {
+            arrivalQueue.add(c);
+        }
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
