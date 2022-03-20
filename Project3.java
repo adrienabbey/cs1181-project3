@@ -72,6 +72,8 @@ import java.util.Scanner;
 class Project3 {
     /* Variables */
     private static String dataFileName = "./dataFiles/arrival.txt";
+    private static int checkoutLanes = 12; // total number of checkout lanes
+    private static int expressLanes = 4; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
