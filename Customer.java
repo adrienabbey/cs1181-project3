@@ -41,8 +41,6 @@ public class Customer implements Comparable<Customer> {
         // We probably want to sort customers based on their arrival time.
         // Customers arriving sooner should be at the top of the PriorityQueue.
 
-        // FIXME: Test this method for correctness.
-
         // If this customer arrived later than the other:
         if (this.arrivalTime > other.arrivalTime) {
             // Then this customer arrived after the other:
@@ -52,6 +50,13 @@ public class Customer implements Comparable<Customer> {
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public String toString() {
+        // FIXME: This needs work.
+        return "Customer [arrivalTime=" + arrivalTime + ", averageSelectionTime=" + averageSelectionTime
+                + ", orderSize=" + orderSize + "]";
     }
 
 }
