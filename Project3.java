@@ -74,17 +74,26 @@ class Project3 {
     private static String dataFileName = "./dataFiles/arrival.txt";
     private static int checkoutLanes = 12; // total number of checkout lanes
     private static int expressLanes = 4; // number of express lanes
+    private static int regularLanes = checkoutLanes - expressLanes; // number of regular lanes
 
     public static void main(String[] args) {
         // Load the customer data:
         ArrayList<Customer> customerList = loadCustomers(dataFileName);
 
-        // Create a PriorityQueue for customer arrival times:
-        PriorityQueue<Customer> arrivalQueue = new PriorityQueue<>();
+        // Create a PriorityQueue for customer checkout times:
+        PriorityQueue<Customer> checkoutQueue = new PriorityQueue<>();
 
-        // Add customers to the arrival queue:
+        // Add customers to the checkout queue:
+        // NOTE: This compares each customer's ready-to-checkout time relative to store
+        // opening. The time they arrived and the time they took to fill their cart are
+        // already accounted for and calculated.
         for (Customer c : customerList) {
-            arrivalQueue.add(c);
+            checkoutQueue.add(c);
+        }
+
+        // FIXME TEST: Display the checkoutQueue:
+        for (int i = 0; i < checkoutQueue.size(); i++) {
+            System.out.println(checkoutQueue.poll());
         }
     }
 
