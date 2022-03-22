@@ -61,6 +61,15 @@ is no interesting activities occur between events.
         If customer is first in line, schedule this customer to end checkout
     Customer ends checkout -- if another customer is waiting in line,
         schedule that customer to end checkout
+
+NOTES:
+  - I'm going to do something a little different than what was suggested in 
+    the instructions: I'm going to have a single event queue that tracks all 
+    events (a PriorityQueue).
+  - As customers reach the top of the event queue, I pull them out and adjust 
+    their 'status', which in turn adjusts their compareTo value.  If they 
+    still have more to do, I put them back into the queue which sorts them 
+    using their new compareTo value.
 */
 
 import java.io.File;
@@ -81,19 +90,19 @@ class Project3 {
         ArrayList<Customer> customerList = loadCustomers(dataFileName);
 
         // Create a PriorityQueue for customer checkout times:
-        PriorityQueue<Customer> checkoutQueue = new PriorityQueue<>();
+        PriorityQueue<Customer> eventQueue = new PriorityQueue<>();
 
-        // Add customers to the checkout queue:
+        // Add customers to the event queue:
         // NOTE: This compares each customer's ready-to-checkout time relative to store
         // opening. The time they arrived and the time they took to fill their cart are
         // already accounted for and calculated.
         for (Customer c : customerList) {
-            checkoutQueue.add(c);
+            eventQueue.add(c);
         }
 
         // FIXME TEST: Display the checkoutQueue:
-        for (int i = 0; i < checkoutQueue.size(); i++) {
-            System.out.println(checkoutQueue.poll());
+        for (int i = 0; i < eventQueue.size(); i++) {
+            System.out.println(eventQueue.poll());
         }
     }
 
