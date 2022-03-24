@@ -106,14 +106,17 @@ class Project3 {
             System.out.println(eventQueue.poll());
         }
 
-        // Create the checkout lanes: FIXME
+        // Create the checkout lanes:
+        // FIXME: How do I look through this ArrayList to find the most appropriate lane
+        // for a given customer?
+        ArrayList<Checkout> checkoutLanes = createCheckoutLanes();
 
         // TODO: Do I need this?
         Double eventTime = 0.0; // Track the current time (relative to store opening)
 
         // Start looping through the event queue:
         while (true) {
-            // Pull the first customer from the event queue:
+            // Poll the first customer from the event queue:
             Customer customer = eventQueue.poll();
 
             // Adjust the current event time:
@@ -175,5 +178,25 @@ class Project3 {
         }
 
         return customerList;
+    }
+
+    private static ArrayList<Checkout> createCheckoutLanes() {
+        // Creates and returns an ArrayList of the store's checkout lanes:
+
+        // Create an ArrayList to hold the checkout lanes:
+        ArrayList<Checkout> checkoutList = new ArrayList<>();
+
+        // Create the regular checkout lanes:
+        for (int i = 0; i < checkoutLanes - expressLanes; i++) {
+            // TODO: Do lanes need names?
+            checkoutList.add(new RegularCheckout());
+        }
+
+        // Create the express checkout lanes:
+        for (int i = 0; i < expressLanes; i++) {
+            checkoutList.add(new ExpressCheckout());
+        }
+
+        return checkoutList;
     }
 }
