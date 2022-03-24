@@ -106,6 +106,8 @@ class Project3 {
             System.out.println(eventQueue.poll());
         }
 
+        // Create the checkout lanes: FIXME
+
         // TODO: Do I need this?
         Double eventTime = 0.0; // Track the current time (relative to store opening)
 
@@ -130,6 +132,9 @@ class Project3 {
                 // TODO: Determine if this customer is waiting to checkout.
                 eventQueue.offer(customer);
             }
+
+            // FIXME: Don't loop more than once for now. Loop unfinished.
+            break;
         }
 
     }
