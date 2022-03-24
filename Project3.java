@@ -88,6 +88,7 @@ class Project3 {
     public static void main(String[] args) {
         // Load the customer data:
         ArrayList<Customer> customerList = loadCustomers(dataFileName);
+        // TODO: Is it okay for this to be an ArrayList?
 
         // Create a PriorityQueue for customer checkout times:
         PriorityQueue<Customer> eventQueue = new PriorityQueue<>();
@@ -97,13 +98,40 @@ class Project3 {
         // opening. The time they arrived and the time they took to fill their cart are
         // already accounted for and calculated.
         for (Customer c : customerList) {
-            eventQueue.add(c);
+            eventQueue.offer(c);
         }
 
-        // FIXME TEST: Display the checkoutQueue:
+        // FIXME TEST: Print out the customer list:
         for (int i = 0; i < eventQueue.size(); i++) {
             System.out.println(eventQueue.poll());
         }
+
+        // TODO: Do I need this?
+        Double eventTime = 0.0; // Track the current time (relative to store opening)
+
+        // Start looping through the event queue:
+        while (true) {
+            // Pull the first customer from the event queue:
+            Customer customer = eventQueue.poll();
+
+            // Adjust the current event time:
+            eventTime = customer.getEventTime();
+
+            // If that customer just arrived:
+            if (customer.getStatus() == 0) {
+                // then set that customer's status to 1 and re-add them to the queue:
+                customer.setStatus(1); // Customer is now selecting items and filling their cart
+                eventQueue.offer(customer);
+            } else if (customer.getStatus() == 1) {
+                // If the customer was filling their cart:
+                // then that customer has finished and is ready to checkout:
+                customer.setStatus(2);
+                // TODO: Add this customer to a checkout lane.
+                // TODO: Determine if this customer is waiting to checkout.
+                eventQueue.offer(customer);
+            }
+        }
+
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
