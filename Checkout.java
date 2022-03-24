@@ -6,10 +6,9 @@
 
 import java.util.LinkedList;
 
-public class Checkout extends LinkedList<Customer> {
+public abstract class Checkout extends LinkedList<Customer> {
 
-    public Checkout() {
-        super();
-    }
+    /* Method */
+    public abstract Double checkout(Customer customer);
 
 }
