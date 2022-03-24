@@ -91,6 +91,11 @@ public class Customer implements Comparable<Customer> {
         return returnTime;
     }
 
+    public void setStatus(int status) {
+        // Set's the customer's status:
+        this.status = status;
+    }
+
     public void setCheckoutDuration(double checkoutDuration) {
         // How long the customer spent scanning and paying for their items in checkout
         // (dependant on order size and lane type). Note, the lane they use determines
