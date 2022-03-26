@@ -7,9 +7,30 @@
 
 public class RegularCheckout extends Checkout {
 
+    /* Fields */
+    private String name;
+
+    /* Constructor */
+    public RegularCheckout(String name) {
+        super();
+        this.name = name;
+    }
+
+    /* Methods */
+    public String getName() {
+        return name;
+    }
+
     @Override
     public Double checkout(Customer customer) {
         // Calculate and return the given Customer's checkout duration:
         return customer.getOrderSize() * 0.05 + 2.0;
+    }
+
+    @Override
+    public int compareTo(Checkout other) {
+        // Compare the checkout lane queue sizes:
+        // FIXME: Test this method!
+        return other.size() - this.size();
     }
 }

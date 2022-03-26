@@ -81,9 +81,9 @@ import java.util.Scanner;
 class Project3 {
     /* Variables */
     private static String dataFileName = "./dataFiles/arrival.txt";
-    private static int checkoutLanes = 12; // total number of checkout lanes
-    private static int expressLanes = 4; // number of express lanes
-    private static int regularLanes = checkoutLanes - expressLanes; // number of regular lanes
+    private static int checkoutLaneCount = 12; // total number of checkout lanes
+    private static int expressLaneCount = 4; // number of express lanes
+    private static int regularLaneCount = checkoutLaneCount - expressLaneCount; // number of regular lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -107,12 +107,11 @@ class Project3 {
         }
 
         // Create the checkout lanes:
-        // FIXME: How do I look through this ArrayList to find the most appropriate lane
-        // for a given customer?
-        ArrayList<Checkout> checkoutLanes = createCheckoutLanes();
+        PriorityQueue<Checkout> expressLanes = createCheckoutLanes(true);
+        PriorityQueue<Checkout> regularLanes = createCheckoutLanes(false);
 
-        // TODO: Do I need this?
-        Double eventTime = 0.0; // Track the current time (relative to store opening)
+        Double eventTime = 0.0; // Track the current time (relative to store opening). This is essential for
+                                // tracking event times.
 
         // Start looping through the event queue:
         while (true) {
@@ -131,15 +130,40 @@ class Project3 {
                 // If the customer was filling their cart:
                 // then that customer has finished and is ready to checkout:
                 customer.setStatus(2);
-                // TODO: Add this customer to a checkout lane.
-                // TODO: Determine if this customer is waiting to checkout.
+
+                // Select an appropriate checkout lane:
+                // If the customer has 12 or fewer items:
+                if (customer.getOrderSize() <= 12) {
+                    // Then this customer can use an express lane.
+
+                    // If the express lanes have longer queues than regular lanes:
+                    if (expressLanes.peek().size() > regularLanes.peek().size()) {
+                        // Then this customer will use a regular lane:
+                        customer.addToCheckoutLane(regularLanes.peek());
+                    } else {
+                        // Otherwise this customer will use an express lane:
+                        customer.addToCheckoutLane(expressLanes.peek());
+                    }
+                } else {
+                    // Otherwise the customer must use a regular lane:
+                    customer.addToCheckoutLane(regularLanes.peek());
+                }
+                // Add this customer back into the event queue:
                 eventQueue.offer(customer);
+            } else if (customer.getStatus() == 2) {
+                // If the customer is ready to checkout:
+                // Check to see if their current lane has other customers in line:
+
+                // TODO: Set the customer's checkout duration:
+                // TODO: Set this customer's status:
+            } else if (customer.getStatus() == 3) {
+                // If this customer has finished checking out:
+                // TODO: Do I need this step?
             }
 
             // FIXME: Don't loop more than once for now. Loop unfinished.
             break;
         }
-
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
@@ -180,23 +204,29 @@ class Project3 {
         return customerList;
     }
 
-    private static ArrayList<Checkout> createCheckoutLanes() {
-        // Creates and returns an ArrayList of the store's checkout lanes:
+    private static PriorityQueue<Checkout> createCheckoutLanes(boolean express) {
+        // Creates and returns a PriorityQueue of the store's checkout lanes.
+        // If true, create express lanes. If false, create regular lanes.
 
-        // Create an ArrayList to hold the checkout lanes:
-        ArrayList<Checkout> checkoutList = new ArrayList<>();
+        // Create a PriorityQueue to hold the checkout lanes:
+        PriorityQueue<Checkout> q = new PriorityQueue<>();
 
-        // Create the regular checkout lanes:
-        for (int i = 0; i < checkoutLanes - expressLanes; i++) {
-            // TODO: Do lanes need names?
-            checkoutList.add(new RegularCheckout());
+        // If not express lanes:
+        if (!express) {
+            // Create the regular checkout lanes:
+            for (int i = 0; i < checkoutLaneCount - expressLaneCount; i++) {
+                q.offer(new RegularCheckout("Regular Checkout " + i));
+            }
         }
 
-        // Create the express checkout lanes:
-        for (int i = 0; i < expressLanes; i++) {
-            checkoutList.add(new ExpressCheckout());
+        // If express lanes:
+        if (express) {
+            // Create the express checkout lanes:
+            for (int i = 0; i < expressLaneCount; i++) {
+                q.offer(new ExpressCheckout("Express Checkout " + i));
+            }
         }
 
-        return checkoutList;
+        return q;
     }
 }

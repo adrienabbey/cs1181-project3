@@ -97,10 +97,6 @@ public class Customer implements Comparable<Customer> {
         return returnTime;
     }
 
-    public void setCheckoutLane(Checkout checkoutLane) {
-        this.checkoutLane = checkoutLane;
-    }
-
     public void setStatus(int status) {
         // Set's the customer's status:
         this.status = status;
