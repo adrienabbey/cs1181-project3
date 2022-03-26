@@ -22,7 +22,7 @@ public class RegularCheckout extends Checkout {
     }
 
     @Override
-    public Double checkout(Customer customer) {
+    public Double getCheckoutDuration(Customer customer) {
         // Calculate and return the given Customer's checkout duration:
         return customer.getOrderSize() * 0.05 + 2.0;
     }
