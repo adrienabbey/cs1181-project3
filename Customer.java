@@ -17,6 +17,7 @@ public class Customer implements Comparable<Customer> {
     private double finishTime; // Time the customer finished all their shopping and left the store (time
                                // relative to store opening)
     private int status; // Tracks what the customer's status is. See getStatus() method for details.
+    private Checkout checkoutLane; // Tracks what lane the customer is in, if any.
 
     /* Constructor */
 
@@ -28,6 +29,7 @@ public class Customer implements Comparable<Customer> {
         this.averageSelectionDuration = averageSelectionTime;
         this.status = 0; // When first added to the event queue (loading of customer data), their status
                          // is 0, meaning they haven't entered the store yet.
+        this.checkoutLane = null;
     }
 
     /* Methods */
@@ -46,6 +48,10 @@ public class Customer implements Comparable<Customer> {
 
     public double getAverageSelectionDuration() {
         return averageSelectionDuration;
+    }
+
+    public Checkout getCheckoutLane() {
+        return checkoutLane;
     }
 
     public int getStatus() {
@@ -91,6 +97,10 @@ public class Customer implements Comparable<Customer> {
         return returnTime;
     }
 
+    public void setCheckoutLane(Checkout checkoutLane) {
+        this.checkoutLane = checkoutLane;
+    }
+
     public void setStatus(int status) {
         // Set's the customer's status:
         this.status = status;
@@ -107,6 +117,12 @@ public class Customer implements Comparable<Customer> {
         // Checkout lanes may have more than 1 customer in them. Each customer in line
         // before them adds to their waitTime:
         this.waitDuration += waitTime;
+    }
+
+    public void addToCheckoutLane(Checkout checkoutLane) {
+        // Add's the customer to the given checkout lane:
+        this.checkoutLane = checkoutLane;
+        checkoutLane.offer(this);
     }
 
     @Override
