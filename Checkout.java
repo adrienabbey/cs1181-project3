@@ -6,9 +6,9 @@
 
 import java.util.LinkedList;
 
-public abstract class Checkout extends LinkedList<Customer> {
+public abstract class Checkout extends LinkedList<Customer> implements Comparable<Checkout> {
 
-    /* Method */
+    /* Methods */
     public abstract Double checkout(Customer customer);
 
 }
