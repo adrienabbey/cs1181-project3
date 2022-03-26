@@ -12,7 +12,7 @@ public class Customer implements Comparable<Customer> {
                                              // divided by order size)
     private double endShoppingTime; // Time the customer finished filling their cart (in minutes relative to store
                                     // opening)
-    private double waitDuration; // Time the customer waited to start checking out, if any.
+    private Double waitDuration; // Time the customer waited to start checking out, if any.
     private double checkoutDuration; // How long it took the customer to scan their items and pay for them
     private double finishTime; // Time the customer finished all their shopping and left the store (time
                                // relative to store opening)
@@ -29,7 +29,9 @@ public class Customer implements Comparable<Customer> {
         this.averageSelectionDuration = averageSelectionTime;
         this.status = 0; // When first added to the event queue (loading of customer data), their status
                          // is 0, meaning they haven't entered the store yet.
-        this.checkoutLane = null;
+        this.checkoutLane = null; // Customers don't have a checkout lane at first.
+        this.waitDuration = null; // Customers don't have a wait duration at first. Null will hopefully help me
+                                  // error check issues.
     }
 
     /* Methods */
@@ -59,16 +61,30 @@ public class Customer implements Comparable<Customer> {
         // 0: customer hasn't entered the store yet
         // 1: customer is currently selecting items and filling their cart
         // 2: customer finished filling their cart and is waiting in line to checkout
-        // 3: customer finished checking out and has left the store
+        // 3: customer has started checking out
+        // 4: customer has finished checking out
+        // null: something went horribly wrong
 
         return status;
+    }
+
+    public double getEndShoppingTime() {
+        // Returns the time the customer finishes filling their cart (relative to store
+        // opening):
+        return arrivalTime + (orderSize * averageSelectionDuration);
+    }
+
+    public double getEndCheckoutTime() {
+        // Return the time the customer finished checking out (relative to store
+        // opening):
+        return arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
     }
 
     public double getEventTime() {
         // Looks at the customer's current status and calculates when the time of their
         // next event.
 
-        double returnTime = 0;
+        Double returnTime = null;
 
         // When customers are first loaded, their status is 0: they have not arrived
         // yet. Return their arrival time:
@@ -88,9 +104,9 @@ public class Customer implements Comparable<Customer> {
             returnTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration;
         }
 
-        // If their status is 3, they're curretly checking out. Return when they'll
-        // finish:
-        if (status == 3) {
+        // If their status is 3 or 4, they're currently checking out (or finished
+        // checking out). Return when they'll finish (or did finish):
+        if (status == 3 || status == 4) {
             returnTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
