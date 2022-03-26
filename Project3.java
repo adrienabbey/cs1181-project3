@@ -83,7 +83,6 @@ class Project3 {
     private static String dataFileName = "./dataFiles/arrival.txt";
     private static int checkoutLaneCount = 12; // total number of checkout lanes
     private static int expressLaneCount = 4; // number of express lanes
-    private static int regularLaneCount = checkoutLaneCount - expressLaneCount; // number of regular lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -110,7 +109,7 @@ class Project3 {
         PriorityQueue<Checkout> expressLanes = createCheckoutLanes(true);
         PriorityQueue<Checkout> regularLanes = createCheckoutLanes(false);
 
-        Double eventTime = 0.0; // Track the current time (relative to store opening). This is essential for
+        double eventTime = 0.0; // Track the current time (relative to store opening). This is essential for
                                 // tracking event times.
 
         // Start looping through the event queue:
@@ -121,8 +120,9 @@ class Project3 {
             // Adjust the current event time:
             eventTime = customer.getEventTime();
 
-            // If that customer just arrived:
+            // Look at the customer's status and handle with care:
             if (customer.getStatus() == 0) {
+                // If that customer just arrived:
                 // then set that customer's status to 1 and re-add them to the queue:
                 customer.setStatus(1); // Customer is now selecting items and filling their cart
                 eventQueue.offer(customer);
@@ -148,17 +148,34 @@ class Project3 {
                     // Otherwise the customer must use a regular lane:
                     customer.addToCheckoutLane(regularLanes.peek());
                 }
-                // Add this customer back into the event queue:
-                eventQueue.offer(customer);
+
+                // Check to see if the lane the customer is in has a queue:
+                if (customer.getCheckoutLane().size() > 1) {
+                    // If the checkout lane has someone else in it:
+                    // TODO: Hmm.
+                } else {
+                    // If the checkout lane is empty:
+                    // TODO: Then this customer starts checking out immediately:
+                    customer.setStatus(4);
+                }
+
+                // If this customer has more to do:
+                if (customer.getStatus() < 4) {
+                    // Then add this customer back into the event queue:
+                    eventQueue.offer(customer);
+                }
             } else if (customer.getStatus() == 2) {
-                // If the customer is ready to checkout:
-                // Check to see if their current lane has other customers in line:
+                // If the customer was waiting to checkout:
+                // TODO: more stuff...?
 
                 // TODO: Set the customer's checkout duration:
                 // TODO: Set this customer's status:
             } else if (customer.getStatus() == 3) {
-                // If this customer has finished checking out:
+                // If this customer was checking out:
                 // TODO: Do I need this step?
+            } else if (customer.getStatus() == 4) {
+                // If this customer had already finished checking out:
+                // TODO: FIXME
             }
 
             // FIXME: Don't loop more than once for now. Loop unfinished.
@@ -185,9 +202,9 @@ class Project3 {
                 // customer:
                 if (fileScanner.hasNextDouble()) {
                     // Grab customer information and assign to variables:
-                    Double arrivalTime = fileScanner.nextDouble();
+                    double arrivalTime = fileScanner.nextDouble();
                     int orderSize = fileScanner.nextInt();
-                    Double averageSelectionTime = fileScanner.nextDouble();
+                    double averageSelectionTime = fileScanner.nextDouble();
 
                     // Create a new customer using the given data:
                     customerList.add(new Customer(arrivalTime, orderSize, averageSelectionTime));
