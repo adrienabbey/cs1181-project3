@@ -1,5 +1,3 @@
-import java.util.Collection;
-
 // Adrien Abbey, CS-1181L-07, Mar. 24, 2022
 // ExpressCheckout class for Project 3
 
@@ -24,7 +22,7 @@ public class ExpressCheckout extends Checkout {
     }
 
     @Override
-    public Double checkout(Customer customer) {
+    public Double getCheckoutDuration(Customer customer) {
         // Calculate and return the given Customer's checkout duration:
         return customer.getOrderSize() * 0.10 + 1.0;
     }
