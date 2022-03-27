@@ -31,6 +31,6 @@ public class RegularCheckout extends Checkout {
     public int compareTo(Checkout other) {
         // Compare the checkout lane queue sizes:
         // FIXME: Test this method!
-        return other.size() - this.size();
+        return this.size() - other.size();
     }
 }

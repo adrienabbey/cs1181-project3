@@ -82,7 +82,7 @@ class Project3 {
     /* Variables */
     private static String dataFileName = "./dataFiles/arrival medium.txt";
     private static int checkoutLaneCount = 12; // total number of checkout lanes
-    private static int expressLaneCount = 3; // number of express lanes
+    private static int expressLaneCount = 6; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -121,7 +121,7 @@ class Project3 {
 
             // Adjust the current event time:
             currentTime = customer.getEventTime();
-            
+
             // FIXME TEST:
             System.out.println("Current time is: " + currentTime);
 
@@ -143,14 +143,14 @@ class Project3 {
                     // If the express lanes have longer queues than regular lanes:
                     if (expressLanes.peek().size() > regularLanes.peek().size()) {
                         // Then this customer will use a regular lane:
-                        customer.addToCheckoutLane(regularLanes.peek());
+                        customerCheckout(customer, regularLanes);
                     } else {
                         // Otherwise this customer will use an express lane:
-                        customer.addToCheckoutLane(expressLanes.peek());
+                        customerCheckout(customer, expressLanes);
                     }
                 } else {
                     // Otherwise the customer must use a regular lane:
-                    customer.addToCheckoutLane(regularLanes.peek());
+                    customerCheckout(customer, regularLanes);
                 }
 
                 // After adding the customer to a lane, check to see if the lane has another
@@ -175,7 +175,8 @@ class Project3 {
 
                 // FIXME TEST:
                 for (Customer c : customer.getCheckoutLane()) {
-                    System.out.println("    Current lane members: " + c.getName() + " in position "+ c.getCheckoutLane().indexOf(c) + " with status of " + c.getStatus());
+                    System.out.println("    Current lane members: " + c.getName() + " in position "
+                            + c.getCheckoutLane().indexOf(c) + " with status of " + c.getStatus());
                 }
 
                 // Check to see if they're still waiting:
@@ -189,16 +190,20 @@ class Project3 {
                     customer.getCheckoutLane().peek().setStatus(3);
 
                     // FIXME TEST:
-                    System.out.println("    " + customer.getName() + "'s current waitDuration is: " + customer.getWaitDuration());
+                    System.out.println(
+                            "    " + customer.getName() + "'s current waitDuration is: " + customer.getWaitDuration());
 
                     // Otherwise they wait for the first person in line to finish:
                     customer.setWaitDuration(
-                            customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime() + 0.01);
+                            customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime() + 0.02);
 
                     // FIXME TESTS:
-                    System.out.println("    " + customer.getCheckoutLane().peek().getName() + "'s current eventTime is: " + customer.getCheckoutLane().peek().getEventTime());
-                    System.out.println("    " + customer.getCheckoutLane().peek().getName() + "'s current waitDuration is: " + customer.getCheckoutLane().peek().getWaitDuration());
-                    System.out.println("    Set " + customer.getName() + "'s waitDuration to " + customer.getWaitDuration());
+                    System.out.println("    " + customer.getCheckoutLane().peek().getName()
+                            + "'s current eventTime is: " + customer.getCheckoutLane().peek().getEventTime());
+                    System.out.println("    " + customer.getCheckoutLane().peek().getName()
+                            + "'s current waitDuration is: " + customer.getCheckoutLane().peek().getWaitDuration());
+                    System.out.println(
+                            "    Set " + customer.getName() + "'s waitDuration to " + customer.getWaitDuration());
                     System.out.println("    " + customer.getName() + "'s new eventTime is: " + customer.getEventTime());
                 }
             } else if (customer.getStatus() == 3) {
@@ -216,9 +221,9 @@ class Project3 {
         }
 
         // Print out the customer data:
-        // for (Customer c : customerList) {
-        // System.out.println(c);
-        // }
+        for (Customer c : customerList) {
+            System.out.println(c);
+        }
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
@@ -283,5 +288,30 @@ class Project3 {
         }
 
         return q;
+    }
+
+    private static void customerCheckout(Customer customer, PriorityQueue<Checkout> q) {
+        // Add the given customer to a lane in the given PriorityQueue of lanes.
+        // In order to properly sort, a checkout lane must be polled out, have a
+        // customer added, then offered back to the queue.
+
+        // Pull a checkout lane from the queue:
+        Checkout checkout = q.poll();
+
+        // Add the given customer to that lane:
+        checkout.offer(customer);
+
+        // Set the customer's checkout lane:
+        customer.setCheckoutLane(checkout);
+
+        // Add the checkout lane back to the queue:
+        q.offer(checkout);
+
+        // Set the customer's checkoutDuration based on that checkout lane's type:
+        customer.setCheckoutDuration(checkout.getCheckoutDuration(customer));
+
+        // FIXME TEST: Display the customer's lane choice:
+        System.out.println(
+                "  Customer " + customer.getCustomerNumber() + " has entered " + customer.getCheckoutLane().getName());
     }
 }

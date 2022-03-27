@@ -186,13 +186,19 @@ public class Customer implements Comparable<Customer> {
         this.waitDuration = waitDuration;
     }
 
-    public void addToCheckoutLane(Checkout checkoutLane) {
-        // Add's the customer to the given checkout lane:
-        this.checkoutLane = checkoutLane;
-        checkoutLane.offer(this);
-        this.checkoutDuration = checkoutLane.getCheckoutDuration(this);
-        System.out.println("  Customer " + customerNumber + " has selected a checkout lane.");
+    public void setCheckoutLane(Checkout checkout) {
+        // Set the customer's checkout lane:
+        this.checkoutLane = checkout;
     }
+
+    // public void addToCheckoutLane(Checkout checkoutLane) {
+    // // Add's the customer to the given checkout lane:
+    // this.checkoutLane = checkoutLane;
+    // checkoutLane.offer(this);
+    // this.checkoutDuration = checkoutLane.getCheckoutDuration(this);
+    // System.out.println(" Customer " + customerNumber + " has entered " +
+    // this.getCheckoutLane().getName());
+    // }
 
     @Override
     public int compareTo(Customer other) {

@@ -31,6 +31,6 @@ public class ExpressCheckout extends Checkout {
     public int compareTo(Checkout other) {
         // Compare the queue lengths of each checkout lane:
         // FIXME: Test this method!
-        return other.size() - this.size();
+        return this.size() - other.size();
     }
 }
