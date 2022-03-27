@@ -80,9 +80,9 @@ import java.util.Scanner;
 
 class Project3 {
     /* Variables */
-    private static String dataFileName = "./dataFiles/arrival.txt";
+    private static String dataFileName = "./dataFiles/arrival medium.txt";
     private static int checkoutLaneCount = 12; // total number of checkout lanes
-    private static int expressLaneCount = 4; // number of express lanes
+    private static int expressLaneCount = 3; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -100,8 +100,8 @@ class Project3 {
         }
 
         // Create the checkout lanes:
-        PriorityQueue<Checkout> expressLanes = createCheckoutLanes(true);
-        PriorityQueue<Checkout> regularLanes = createCheckoutLanes(false);
+        PriorityQueue<Checkout> expressLanes = createCheckoutLanes(true); // true means create express lanes
+        PriorityQueue<Checkout> regularLanes = createCheckoutLanes(false); // false means create regular lanes
 
         double currentTime = 0.0; // Track the current time (relative to store opening). This is essential for
                                   // tracking event times.
@@ -116,8 +116,14 @@ class Project3 {
             // Poll the first customer from the event queue:
             Customer customer = eventQueue.poll();
 
+            // FIXME TEST:
+            System.out.println("Currently serving " + customer.getName() + " with status of " + customer.getStatus());
+
             // Adjust the current event time:
             currentTime = customer.getEventTime();
+            
+            // FIXME TEST:
+            System.out.println("Current time is: " + currentTime);
 
             // Look at the customer's status and handle with care:
             if (customer.getStatus() == 0) {
@@ -153,10 +159,12 @@ class Project3 {
                     // If the checkout lane has someone else in it:
                     System.out.println("    There was someone else in the queue!");
 
+                    // Make sure the first person in queue is set to checkout:
+                    customer.getCheckoutLane().peek().setStatus(3);
+
                     // Set this customer's wait time so that their position in the event queue is
-                    // shortly after the first person in the lane. FIXME: This needs testing,
-                    // optimization.
-                    customer.setWaitTime((customer.getCheckoutLane().peek().getEventTime() + 0.01) - currentTime);
+                    // shortly after the first person in the lane.
+                    customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() + 0.01) - currentTime);
                 } else {
                     // If the checkout lane is empty, this customer starts checking out:
                     customer.setStatus(3);
@@ -165,50 +173,52 @@ class Project3 {
             } else if (customer.getStatus() == 2) {
                 // If the customer was waiting to checkout:
 
+                // FIXME TEST:
+                for (Customer c : customer.getCheckoutLane()) {
+                    System.out.println("    Current lane members: " + c.getName() + " in position "+ c.getCheckoutLane().indexOf(c) + " with status of " + c.getStatus());
+                }
+
                 // Check to see if they're still waiting:
                 // If this customer is next in line:
-                if (customer.getCheckoutLane().peek() == customer) {
+                if (customer.getCheckoutLane().indexOf(customer) == 0) {
                     // Then they start checking out:
-                    customer.setWaitTime(currentTime - customer.getEndShoppingTime());
+                    customer.setWaitDuration(currentTime - customer.getEndShoppingTime());
                     customer.setStatus(3);
                 } else {
-                    // Otherwise they wait for the first person in line to finish: FIXME: This needs
-                    // testing, optimization.
-                    customer.setWaitTime((customer.getCheckoutLane().peek().getEventTime() + 0.01) - currentTime);
+                    // Make sure the person at the front of the queue is set to checkout:
+                    customer.getCheckoutLane().peek().setStatus(3);
+
+                    // FIXME TEST:
+                    System.out.println("    " + customer.getName() + "'s current waitDuration is: " + customer.getWaitDuration());
+
+                    // Otherwise they wait for the first person in line to finish:
+                    customer.setWaitDuration(
+                            customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime() + 0.01);
+
+                    // FIXME TESTS:
+                    System.out.println("    " + customer.getCheckoutLane().peek().getName() + "'s current eventTime is: " + customer.getCheckoutLane().peek().getEventTime());
+                    System.out.println("    " + customer.getCheckoutLane().peek().getName() + "'s current waitDuration is: " + customer.getCheckoutLane().peek().getWaitDuration());
+                    System.out.println("    Set " + customer.getName() + "'s waitDuration to " + customer.getWaitDuration());
+                    System.out.println("    " + customer.getName() + "'s new eventTime is: " + customer.getEventTime());
                 }
             } else if (customer.getStatus() == 3) {
                 // If this customer was checking out:
-
                 // Then this customer finishes checking out:
-                Checkout checkoutLane = customer.getCheckoutLane();
                 customer.getCheckoutLane().remove(customer);
                 customer.setStatus(4);
-
-                // If there's another customer in this checkout lane:
-                if (checkoutLane.size() > 0) {
-                    // Then the next customer should start checking out:
-                    checkoutLane.peek().setStatus(3);
-                }
             }
 
             // If this customer has more to do:
             if (customer.getStatus() < 4) {
                 // Then add this customer back into the event queue:
-                try {
-                    eventQueue.offer(customer);
-                } catch (NullPointerException e) {
-                    System.out.println(e);
-                    System.out.println(customer);
-                    System.exit(1);
-                }
-
+                eventQueue.offer(customer);
             }
         }
 
         // Print out the customer data:
-        for (Customer c : customerList) {
-            System.out.println(c);
-        }
+        // for (Customer c : customerList) {
+        // System.out.println(c);
+        // }
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
