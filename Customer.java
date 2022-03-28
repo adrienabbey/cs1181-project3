@@ -163,8 +163,6 @@ public class Customer implements Comparable<Customer> {
             finishTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
-        // Display the customer's new status:
-        // System.out.println(this.getEventText());
     }
 
     public void setCheckoutDuration(double checkoutDuration) {

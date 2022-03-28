@@ -126,16 +126,15 @@ class Project3 {
                 customer.setStatus(1); // Customer is now selecting items and filling their cart
 
                 // Print to event log:
-                System.out.println(((Math.round(currentTime * 100.0)) / 100.0) + ": Arrival Customer "
-                        + customer.getCustomerNumber());
+                System.out.println(String.format("%.2f: Arrival %s", currentTime, customer.getName()));
+
             } else if (customer.getStatus() == 1) {
                 // If the customer was filling their cart:
                 // then that customer has finished and is ready to checkout:
                 customer.setStatus(2);
 
                 // Print to event log:
-                System.out.println(((Math.round(currentTime * 100.0)) / 100.0) + ": Finished Shopping Customer "
-                        + customer.getCustomerNumber());
+                System.out.println(String.format("%.2f: Finished Shopping %s", currentTime, customer.getName()));
 
                 // Select an appropriate checkout lane:
                 // If the customer has 12 or fewer items:
@@ -185,11 +184,6 @@ class Project3 {
                     // Make sure the person at the front of the queue is set to checkout:
                     customer.getCheckoutLane().peek().setStatus(3);
 
-                    // FIXME TEST:
-                    // System.out.println(
-                    // " " + customer.getName() + "'s current waitDuration is: " +
-                    // customer.getWaitDuration());
-
                     // Otherwise they wait for the first person in line to finish:
                     customer.setWaitDuration(
                             customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime()
@@ -200,13 +194,11 @@ class Project3 {
                 // If this customer was checking out:
 
                 // Print to event log:
-                System.out.println(((Math.round(currentTime * 100.0)) / 100.0) + ": Finished Checkout "
-                        + customer.getName() + " on " + customer.getCheckoutLane() + " ("
-                        + (Math.round(customer.getWaitDuration() * 100.0) / 100.0) + " minute wait, "
-                        + (customer.getCheckoutLane().size() - 1) + " people in line -- finished shopping at "
-                        + (Math.round(customer.getEndShoppingTime() * 100.0) / 100.0)
-                        + ", got to the front of the line at "
-                        + (((customer.getEndShoppingTime() + customer.getWaitDuration()) * 100.0) / 100.0) + ")");
+                System.out.println(String.format(
+                        "%.2f: Finished Checkout %s on %s (%.2f minute wait, %d people in line -- finished shopping at %.2f, got to the front of the line at %.2f)",
+                        currentTime, customer.getName(), customer.getCheckoutLane(), customer.getWaitDuration(),
+                        (customer.getCheckoutLane().size() - 1), customer.getEndShoppingTime(),
+                        (customer.getEndShoppingTime() + customer.getWaitDuration())));
 
                 // Then this customer finishes checking out:
                 customer.getCheckoutLane().remove(customer);
@@ -222,11 +214,14 @@ class Project3 {
 
         // Print out the average wait time for all customers:
         double avgWaitDuration = 0.0;
+        double avgCheckoutDuration = 0.0;
         int customerCount = customerList.size();
         for (Customer c : customerList) {
             avgWaitDuration += c.getWaitDuration();
+            avgCheckoutDuration += c.getCheckoutDuration();
         }
-        System.out.println("Average wait time: " + (avgWaitDuration / customerCount));
+        System.out.println(String.format("Average checkout time: %.3f", (avgCheckoutDuration / customerCount)));
+        System.out.println(String.format("Average wait time: %.3f", (avgWaitDuration / customerCount)));
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
