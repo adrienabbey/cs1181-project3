@@ -24,8 +24,8 @@ public class Customer implements Comparable<Customer> {
     /* Constructor */
 
     public Customer(double arrivalTime, int orderSize, double averageSelectionTime) {
-        customerCount++;
         this.customerNumber = customerCount;
+        customerCount++;
         this.arrivalTime = arrivalTime;
         this.orderSize = orderSize;
         this.averageSelectionDuration = averageSelectionTime;
@@ -68,7 +68,7 @@ public class Customer implements Comparable<Customer> {
 
     public String getName() {
         // Return a string of this customer's name:
-        return "Customer #" + customerNumber;
+        return "Customer " + customerNumber;
     }
 
     public int getStatus() {
@@ -164,7 +164,7 @@ public class Customer implements Comparable<Customer> {
         }
 
         // Display the customer's new status:
-        System.out.println(this.getEventText());
+        // System.out.println(this.getEventText());
     }
 
     public void setCheckoutDuration(double checkoutDuration) {
@@ -190,15 +190,6 @@ public class Customer implements Comparable<Customer> {
         // Set the customer's checkout lane:
         this.checkoutLane = checkout;
     }
-
-    // public void addToCheckoutLane(Checkout checkoutLane) {
-    // // Add's the customer to the given checkout lane:
-    // this.checkoutLane = checkoutLane;
-    // checkoutLane.offer(this);
-    // this.checkoutDuration = checkoutLane.getCheckoutDuration(this);
-    // System.out.println(" Customer " + customerNumber + " has entered " +
-    // this.getCheckoutLane().getName());
-    // }
 
     @Override
     public int compareTo(Customer other) {

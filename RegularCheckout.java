@@ -17,9 +17,6 @@ public class RegularCheckout extends Checkout {
     }
 
     /* Methods */
-    public String getName() {
-        return name;
-    }
 
     @Override
     public Double getCheckoutDuration(Customer customer) {
@@ -32,5 +29,10 @@ public class RegularCheckout extends Checkout {
         // Compare the checkout lane queue sizes:
         // FIXME: Test this method!
         return this.size() - other.size();
+    }
+
+    @Override
+    public String toString() {
+        return name + " (" + (size() - 1) + ")";
     }
 }
