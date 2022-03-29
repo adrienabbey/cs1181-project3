@@ -14,9 +14,8 @@ public class Customer implements Comparable<Customer> {
     private double checkoutTime; // Time the customer finished filling their cart (in minutes relative to store
                                  // opening)
     private Double waitDuration; // Time the customer waited to start checking out, if any.
+    private Double waitTime; // Time the customer is waiting for to check out if any.
     private double checkoutDuration; // How long it took the customer to scan their items and pay for them.
-    private double finishTime; // Time the customer finished all their shopping and left the store (time
-                               // relative to store opening).
     private int status; // Tracks what the customer's status is. See getStatus() method for details.
     private Checkout checkoutLane; // Tracks what lane the customer is in, if any.
 
@@ -28,18 +27,16 @@ public class Customer implements Comparable<Customer> {
         this.arrivalTime = arrivalTime;
         this.itemCount = orderSize;
         this.averageSelectionDuration = averageSelectionTime;
+        this.checkoutTime = arrivalTime + (this.itemCount * this.averageSelectionDuration);
         this.status = 0; // When first added to the event queue (loading of customer data), their status
                          // is 0, meaning they haven't entered the store yet.
+        this.waitTime = null;
         this.checkoutLane = null; // Customers don't have a checkout lane at first.
-        this.waitDuration = 0.0; // Customers don't have a wait duration at first. Null will hopefully help me
-                                 // error check issues.
+        this.waitDuration = null; // Customers don't have a wait duration at first. Null will hopefully help me
+                                  // error check issues.
     }
 
     /* Methods */
-
-    // public int getCustomerNumber() {
-    // return customerNumber;
-    // }
 
     public double getArrivalTime() {
         return arrivalTime;
@@ -48,10 +45,6 @@ public class Customer implements Comparable<Customer> {
     public int getItemCount() {
         return itemCount;
     }
-
-    // public double getAverageSelectionDuration() {
-    // return averageSelectionDuration;
-    // }
 
     public Checkout getCheckoutLane() {
         return checkoutLane;
@@ -69,8 +62,8 @@ public class Customer implements Comparable<Customer> {
         return checkoutTime;
     }
 
-    public double getFinishTime() {
-        return finishTime;
+    public Double getWaitTime() {
+        return waitTime;
     }
 
     public String getName() {
@@ -89,28 +82,6 @@ public class Customer implements Comparable<Customer> {
 
         return status;
     }
-
-    // public String getEventText() {
-    // // Return a string of what the customer is doing:
-
-    // if (status == 0) {
-    // return " Customer " + customerNumber + " has not entered the store yet.";
-    // } else if (status == 1) {
-    // return " Customer " + customerNumber + " has entered the store and is filling
-    // their cart.";
-    // } else if (status == 2) {
-    // return " Customer " + customerNumber + " has finished filling their cart and
-    // is waiting to checkout.";
-    // } else if (status == 3) {
-    // return " Customer " + customerNumber + " has started checking out.";
-    // } else if (status == 4) {
-    // return " Customer " + customerNumber + " has finished checking out and left
-    // the store.";
-    // } else {
-    // return " Something went very, very wrong with Customer " + customerNumber +
-    // "'s status.";
-    // }
-    // }
 
     public double getEndShoppingTime() {
         // Returns the time the customer finishes filling their cart (relative to store
@@ -145,7 +116,7 @@ public class Customer implements Comparable<Customer> {
         // If their status is 2, they've finished filling their cart and are waiting on
         // others in their checkout lane:
         if (status == 2) {
-            returnTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration;
+            returnTime = waitTime;
         }
 
         // If their status is 3, they're currently checking out:
@@ -167,13 +138,11 @@ public class Customer implements Comparable<Customer> {
 
         // Calculate any important statistics:
         if (status == 2) {
-            // Customer is waiting to check out, set their endShoppingTime:
-            checkoutTime = arrivalTime + (itemCount * averageSelectionDuration);
-        } else if (status == 4) {
-            // Customer has finished checking out and leaves the store:
-            finishTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
+            waitTime = checkoutTime;
+            // When a customer first gets set to ready to checkout, their waitDuration is
+            // initially 0.0:
+            waitDuration = 0.0;
         }
-
     }
 
     public void setCheckoutDuration(double checkoutDuration) {
@@ -183,13 +152,6 @@ public class Customer implements Comparable<Customer> {
         this.checkoutDuration = checkoutDuration;
     }
 
-    // public void addWaitTime(double waitTime) {
-    // // Checkout lanes may have more than 1 customer in them. Each customer in
-    // line
-    // // before them adds to their waitTime:
-    // this.waitDuration += waitTime;
-    // }
-
     public void setWaitDuration(double waitDuration) {
         // Set the given customer's waitTime:
         this.waitDuration = waitDuration;
@@ -198,6 +160,14 @@ public class Customer implements Comparable<Customer> {
     public void setCheckoutLane(Checkout checkout) {
         // Set the customer's checkout lane:
         this.checkoutLane = checkout;
+    }
+
+    public void setWaitTime(double waitTime) {
+        // Set this customer's waitTime to the given time value:
+        this.waitTime = waitTime;
+
+        // Update this customer's waitDuration as well:
+        waitDuration = waitTime - getEndShoppingTime();
     }
 
     @Override
@@ -210,19 +180,16 @@ public class Customer implements Comparable<Customer> {
         } else if (this.getEventTime() < other.getEventTime()) {
             return -1;
         } else {
-            return 0;
+            // These customers have the same wait time.
+            // If the other customer is checking out and this one is waiting to check out:
+            if ((this.getStatus() == 2) && (other.getStatus() == 3)) {
+                // Then the other customer takes priority:
+                return 1;
+            } else if ((other.getStatus() == 2) && (this.getStatus() == 3)) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
-
-    // @Override
-    // public String toString() {
-    // return "Customer [arrivalTime=" + arrivalTime + ", averageSelectionDuration="
-    // + averageSelectionDuration
-    // + ", checkoutDuration=" + checkoutDuration + ", checkoutLane=" + checkoutLane
-    // + ", customerNumber="
-    // + customerNumber + ", checkoutTime=" + checkoutTime + ", finishTime=" +
-    // finishTime
-    // + ", orderSize=" + itemCount + ", status=" + status + ", waitDuration=" +
-    // waitDuration + "]";
-    // }
 }

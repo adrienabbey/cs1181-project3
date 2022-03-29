@@ -91,9 +91,9 @@ import java.util.Scanner;
 
 class Project3 {
     /* Variables */
-    private static String dataFileName = "./dataFiles/arrival medium.txt";
-    private static int checkoutLaneCount = 4; // total number of checkout lanes
-    private static int expressLaneCount = 2; // number of express lanes
+    private static String dataFileName = "./dataFiles/arrival.txt";
+    private static int checkoutLaneCount = 12; // total number of checkout lanes
+    private static int expressLaneCount = 4; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -169,26 +169,8 @@ class Project3 {
                 // customer in it:
                 if (customer.getCheckoutLane().size() > 1) {
                     // If the checkout lane has someone else in it:
-
-                    // Make sure the first person in queue is set to checkout:
-                    // Customer reQueue = customer.getCheckoutLane().peek();
-                    // reQueue.setStatus(3);
-                    // eventQueue.remove(reQueue);
-                    // eventQueue.offer(reQueue);
-
-                    // Set this customer's wait time so that their position in the event queue is
-                    // shortly after the first person in the lane.
-                    // Source for Math.ulp method: https://stackoverflow.com/a/3900464
-
-                    customer.setWaitDuration(customer.getCheckoutLane().peek().getEventTime() - currentTime + 0.02);
-
-                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() -
-                    // currentTime) + Math.ulp(customer.getCheckoutLane().peek().getEventTime() -
-                    // currentTime));
-
-                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() +
-                    // Math.ulp(customer.getCheckoutLane().peek().getEventTime())) - currentTime);
-
+                    // Set this customer's wait time:
+                    customer.setWaitTime(customer.getCheckoutLane().peek().getEventTime());
                 } else {
                     // If the checkout lane is empty, this customer starts checking out:
                     customer.setStatus(3);
@@ -198,31 +180,15 @@ class Project3 {
                 // If the customer was waiting to checkout:
 
                 // Check to see if they're still waiting:
+
                 // If this customer is next in line:
                 if (customer.getCheckoutLane().indexOf(customer) == 0) {
                     // Then they start checking out:
                     customer.setWaitDuration(currentTime - customer.getEndShoppingTime());
                     customer.setStatus(3);
                 } else {
-                    // Make sure the person at the front of the queue is set to checkout:
-                    // Customer reQueue = customer.getCheckoutLane().peek();
-                    // reQueue.setStatus(3);
-                    // eventQueue.remove(reQueue);
-                    // eventQueue.offer(reQueue);
-
                     // Otherwise they wait for the first person in line to finish:
-                    customer.setWaitDuration(
-                            customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime() + 0.02);
-
-                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() -
-                    // customer.getEndShoppingTime()) +
-                    // Math.ulp(customer.getCheckoutLane().peek().getEventTime() -
-                    // customer.getEndShoppingTime()));
-
-                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() +
-                    // Math.ulp(customer.getCheckoutLane().peek().getEventTime())) -
-                    // customer.getEndShoppingTime());
-
+                    customer.setWaitTime(customer.getCheckoutLane().peek().getEventTime());
                 }
             } else if (customer.getStatus() == 3) {
                 // If this customer was checking out:
@@ -333,13 +299,13 @@ class Project3 {
         return q;
     }
 
-    private static void customerCheckout(Customer customer, PriorityQueue<Checkout> q) {
+    private static void customerCheckout(Customer customer, PriorityQueue<Checkout> checkoutLanes) {
         // Add the given customer to a lane in the given PriorityQueue of lanes.
         // In order to properly sort, a checkout lane must be polled out, have a
         // customer added, then offered back to the queue.
 
-        // Pull a checkout lane from the queue:
-        Checkout checkout = q.poll();
+        // Pull a checkout lane from the queue of lanes:
+        Checkout checkout = checkoutLanes.poll();
 
         // Add the given customer to that lane:
         checkout.offer(customer);
@@ -348,7 +314,7 @@ class Project3 {
         customer.setCheckoutLane(checkout);
 
         // Add the checkout lane back to the queue:
-        q.offer(checkout);
+        checkoutLanes.offer(checkout);
 
         // Set the customer's checkoutDuration based on that checkout lane's type:
         customer.setCheckoutDuration(checkout.getCheckoutDuration(customer));
