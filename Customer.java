@@ -8,16 +8,15 @@ public class Customer implements Comparable<Customer> {
     private static int customerCount = 0; // Track how many customers there are. Also used to determine customer number.
     private int customerNumber; // Assign customers an ID number
     private double arrivalTime; // Time of arrival at the store (in minutes relative from the store opening)
-    private int orderSize; // Order size (the number of items they purchase)
+    private int itemCount; // Order size (the number of items they purchase)
     private double averageSelectionDuration; // The average time it takes to select each item (total time spent browsing
                                              // divided by order size)
     private double checkoutTime; // Time the customer finished filling their cart (in minutes relative to store
-                                 // opening) FIXME: Calculate this for statistics?
+                                 // opening)
     private Double waitDuration; // Time the customer waited to start checking out, if any.
-    private double checkoutDuration; // How long it took the customer to scan their items and pay for them. FIXME:
-                                     // Calculate for statistics?
+    private double checkoutDuration; // How long it took the customer to scan their items and pay for them.
     private double finishTime; // Time the customer finished all their shopping and left the store (time
-                               // relative to store opening). FIXME: Calculate for statistics?
+                               // relative to store opening).
     private int status; // Tracks what the customer's status is. See getStatus() method for details.
     private Checkout checkoutLane; // Tracks what lane the customer is in, if any.
 
@@ -27,7 +26,7 @@ public class Customer implements Comparable<Customer> {
         this.customerNumber = customerCount;
         customerCount++;
         this.arrivalTime = arrivalTime;
-        this.orderSize = orderSize;
+        this.itemCount = orderSize;
         this.averageSelectionDuration = averageSelectionTime;
         this.status = 0; // When first added to the event queue (loading of customer data), their status
                          // is 0, meaning they haven't entered the store yet.
@@ -38,21 +37,21 @@ public class Customer implements Comparable<Customer> {
 
     /* Methods */
 
-    public int getCustomerNumber() {
-        return customerNumber;
-    }
+    // public int getCustomerNumber() {
+    // return customerNumber;
+    // }
 
     public double getArrivalTime() {
         return arrivalTime;
     }
 
-    public int getOrderSize() {
-        return orderSize;
+    public int getItemCount() {
+        return itemCount;
     }
 
-    public double getAverageSelectionDuration() {
-        return averageSelectionDuration;
-    }
+    // public double getAverageSelectionDuration() {
+    // return averageSelectionDuration;
+    // }
 
     public Checkout getCheckoutLane() {
         return checkoutLane;
@@ -64,6 +63,14 @@ public class Customer implements Comparable<Customer> {
 
     public double getCheckoutDuration() {
         return checkoutDuration;
+    }
+
+    public double getCheckoutTime() {
+        return checkoutTime;
+    }
+
+    public double getFinishTime() {
+        return finishTime;
     }
 
     public String getName() {
@@ -83,34 +90,38 @@ public class Customer implements Comparable<Customer> {
         return status;
     }
 
-    public String getEventText() {
-        // Return a string of what the customer is doing:
+    // public String getEventText() {
+    // // Return a string of what the customer is doing:
 
-        if (status == 0) {
-            return "  Customer " + customerNumber + " has not entered the store yet.";
-        } else if (status == 1) {
-            return "  Customer " + customerNumber + " has entered the store and is filling their cart.";
-        } else if (status == 2) {
-            return "  Customer " + customerNumber + " has finished filling their cart and is waiting to checkout.";
-        } else if (status == 3) {
-            return "  Customer " + customerNumber + " has started checking out.";
-        } else if (status == 4) {
-            return "  Customer " + customerNumber + " has finished checking out and left the store.";
-        } else {
-            return "  Something went very, very wrong with Customer " + customerNumber + "'s status.";
-        }
-    }
+    // if (status == 0) {
+    // return " Customer " + customerNumber + " has not entered the store yet.";
+    // } else if (status == 1) {
+    // return " Customer " + customerNumber + " has entered the store and is filling
+    // their cart.";
+    // } else if (status == 2) {
+    // return " Customer " + customerNumber + " has finished filling their cart and
+    // is waiting to checkout.";
+    // } else if (status == 3) {
+    // return " Customer " + customerNumber + " has started checking out.";
+    // } else if (status == 4) {
+    // return " Customer " + customerNumber + " has finished checking out and left
+    // the store.";
+    // } else {
+    // return " Something went very, very wrong with Customer " + customerNumber +
+    // "'s status.";
+    // }
+    // }
 
     public double getEndShoppingTime() {
         // Returns the time the customer finishes filling their cart (relative to store
         // opening):
-        return arrivalTime + (orderSize * averageSelectionDuration);
+        return arrivalTime + (itemCount * averageSelectionDuration);
     }
 
     public double getEndCheckoutTime() {
         // Return the time the customer finished checking out (relative to store
         // opening):
-        return arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
+        return arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
     }
 
     public double getEventTime() {
@@ -128,23 +139,23 @@ public class Customer implements Comparable<Customer> {
         // If their status is 1, they've started shopping: return the time when they'll
         // finish filling their cart:
         if (status == 1) {
-            returnTime = arrivalTime + (orderSize * averageSelectionDuration);
+            returnTime = arrivalTime + (itemCount * averageSelectionDuration);
         }
 
         // If their status is 2, they've finished filling their cart and are waiting on
         // others in their checkout lane:
         if (status == 2) {
-            returnTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration;
+            returnTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration;
         }
 
         // If their status is 3, they're currently checking out:
         if (status == 3) {
-            returnTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
+            returnTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
         // If their status is 4, they've finished checking out and left the store:
         if (status == 4) {
-            returnTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
+            returnTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
         return returnTime;
@@ -157,10 +168,10 @@ public class Customer implements Comparable<Customer> {
         // Calculate any important statistics:
         if (status == 2) {
             // Customer is waiting to check out, set their endShoppingTime:
-            checkoutTime = arrivalTime + (orderSize * averageSelectionDuration);
+            checkoutTime = arrivalTime + (itemCount * averageSelectionDuration);
         } else if (status == 4) {
             // Customer has finished checking out and leaves the store:
-            finishTime = arrivalTime + (orderSize * averageSelectionDuration) + waitDuration + checkoutDuration;
+            finishTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
     }
@@ -203,11 +214,15 @@ public class Customer implements Comparable<Customer> {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Customer [arrivalTime=" + arrivalTime + ", averageSelectionDuration=" + averageSelectionDuration
-                + ", checkoutDuration=" + checkoutDuration + ", checkoutLane=" + checkoutLane + ", customerNumber="
-                + customerNumber + ", checkoutTime=" + checkoutTime + ", finishTime=" + finishTime
-                + ", orderSize=" + orderSize + ", status=" + status + ", waitDuration=" + waitDuration + "]";
-    }
+    // @Override
+    // public String toString() {
+    // return "Customer [arrivalTime=" + arrivalTime + ", averageSelectionDuration="
+    // + averageSelectionDuration
+    // + ", checkoutDuration=" + checkoutDuration + ", checkoutLane=" + checkoutLane
+    // + ", customerNumber="
+    // + customerNumber + ", checkoutTime=" + checkoutTime + ", finishTime=" +
+    // finishTime
+    // + ", orderSize=" + itemCount + ", status=" + status + ", waitDuration=" +
+    // waitDuration + "]";
+    // }
 }

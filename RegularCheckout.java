@@ -21,13 +21,12 @@ public class RegularCheckout extends Checkout {
     @Override
     public Double getCheckoutDuration(Customer customer) {
         // Calculate and return the given Customer's checkout duration:
-        return customer.getOrderSize() * 0.05 + 2.0;
+        return customer.getItemCount() * 0.05 + 2.0;
     }
 
     @Override
     public int compareTo(Checkout other) {
         // Compare the checkout lane queue sizes:
-        // FIXME: Test this method!
         return this.size() - other.size();
     }
 

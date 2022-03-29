@@ -70,6 +70,17 @@ NOTES:
     their 'status', which in turn adjusts their compareTo value.  If they 
     still have more to do, I put them back into the queue which sorts them 
     using their new compareTo value.
+  - Because of how I handle the eventQueue timing of lanes with more than one 
+    customer (I look at the time when the front of the queue will finish 
+    checking out and set each customer to act after that), there will be a very
+    small change in queue times, which hopefully will be accepted as a rounding
+    error.  I know it's not ideal, and there's likely a better solution than
+    what I picked, but I don't want to go back and refactor all my code to fix
+    this.
+  - The instruction PDF states that "customers will always select the checkout 
+    area with the shortest number of other customers in line".  The in-class 
+    description suggested otherwise.  I'm going to assume it's safe to use the 
+    method described in the PDF instead.
 */
 
 import java.io.File;
@@ -138,7 +149,7 @@ class Project3 {
 
                 // Select an appropriate checkout lane:
                 // If the customer has 12 or fewer items:
-                if (customer.getOrderSize() <= 12) {
+                if (customer.getItemCount() <= 12) {
                     // Then this customer can use an express lane.
 
                     // If the express lanes have longer queues than regular lanes:
@@ -160,12 +171,24 @@ class Project3 {
                     // If the checkout lane has someone else in it:
 
                     // Make sure the first person in queue is set to checkout:
-                    customer.getCheckoutLane().peek().setStatus(3);
+                    // Customer reQueue = customer.getCheckoutLane().peek();
+                    // reQueue.setStatus(3);
+                    // eventQueue.remove(reQueue);
+                    // eventQueue.offer(reQueue);
 
                     // Set this customer's wait time so that their position in the event queue is
                     // shortly after the first person in the lane.
-                    customer.setWaitDuration(
-                            (customer.getCheckoutLane().peek().getEventTime() + 0.0000001) - currentTime);
+                    // Source for Math.ulp method: https://stackoverflow.com/a/3900464
+
+                    customer.setWaitDuration(customer.getCheckoutLane().peek().getEventTime() - currentTime + 0.02);
+
+                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() -
+                    // currentTime) + Math.ulp(customer.getCheckoutLane().peek().getEventTime() -
+                    // currentTime));
+
+                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() +
+                    // Math.ulp(customer.getCheckoutLane().peek().getEventTime())) - currentTime);
+
                 } else {
                     // If the checkout lane is empty, this customer starts checking out:
                     customer.setStatus(3);
@@ -182,12 +205,23 @@ class Project3 {
                     customer.setStatus(3);
                 } else {
                     // Make sure the person at the front of the queue is set to checkout:
-                    customer.getCheckoutLane().peek().setStatus(3);
+                    // Customer reQueue = customer.getCheckoutLane().peek();
+                    // reQueue.setStatus(3);
+                    // eventQueue.remove(reQueue);
+                    // eventQueue.offer(reQueue);
 
                     // Otherwise they wait for the first person in line to finish:
                     customer.setWaitDuration(
-                            customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime()
-                                    + 0.0000001);
+                            customer.getCheckoutLane().peek().getEventTime() - customer.getEndShoppingTime() + 0.02);
+
+                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() -
+                    // customer.getEndShoppingTime()) +
+                    // Math.ulp(customer.getCheckoutLane().peek().getEventTime() -
+                    // customer.getEndShoppingTime()));
+
+                    // customer.setWaitDuration((customer.getCheckoutLane().peek().getEventTime() +
+                    // Math.ulp(customer.getCheckoutLane().peek().getEventTime())) -
+                    // customer.getEndShoppingTime());
 
                 }
             } else if (customer.getStatus() == 3) {
@@ -202,6 +236,17 @@ class Project3 {
 
                 // Then this customer finishes checking out:
                 customer.getCheckoutLane().remove(customer);
+
+                // If there's another customer in the checkout lane:
+                if (customer.getCheckoutLane().size() > 0) {
+                    // Then set that customer as checking out and reQueue them in the eventQueue:
+                    Customer reQueue = customer.getCheckoutLane().peek();
+                    reQueue.setStatus(3);
+                    eventQueue.remove(reQueue);
+                    eventQueue.add(reQueue);
+                }
+
+                // This customer is ready to go home:
                 customer.setStatus(4);
             }
 
@@ -309,7 +354,7 @@ class Project3 {
         customer.setCheckoutDuration(checkout.getCheckoutDuration(customer));
 
         // Print to event log:
-        if (customer.getOrderSize() <= 12) {
+        if (customer.getItemCount() <= 12) {
             System.out.println("  12 or fewer, chose " + customer.getCheckoutLane());
         } else {
             System.out.println("  More than 12, chose " + customer.getCheckoutLane());
