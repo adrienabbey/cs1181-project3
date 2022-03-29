@@ -81,6 +81,12 @@ NOTES:
     area with the shortest number of other customers in line".  The in-class 
     description suggested otherwise.  I'm going to assume it's safe to use the 
     method described in the PDF instead.
+  - I spent DAYS trying to figure out why my code was buggy.  Turns out I can't
+    easily resort a PriorityQueue when the sorting of specific objects change
+    in the middle of that list.  I thought PriorityQueueObj.remove(specificObj)
+    would remove a specific object, but all it did was remove the head.  Then
+    when I went to readd that object, it just created duplicates of an existing
+    object.
 */
 
 import java.io.File;
@@ -91,7 +97,7 @@ import java.util.Scanner;
 
 class Project3 {
     /* Variables */
-    private static String dataFileName = "./dataFiles/arrival medium.txt";
+    private static String dataFileName = "./dataFiles/arrival.txt";
     private static int checkoutLaneCount = 6; // total number of checkout lanes
     private static int expressLaneCount = 2; // number of express lanes
 
@@ -99,7 +105,7 @@ class Project3 {
         // Load the customer data:
         ArrayList<Customer> customerList = loadCustomers(dataFileName);
 
-        // Create a PriorityQueue for customer checkout times:
+        // Create a PriorityQueue for customer event times:
         PriorityQueue<Customer> eventQueue = new PriorityQueue<>();
 
         // Add customers to the event queue:
@@ -201,26 +207,22 @@ class Project3 {
                         (customer.readyToCheckoutTime() + customer.getWaitDuration())));
 
                 // Then this customer finishes checking out:
-                Checkout lane = customer.getCheckoutLane();
-                lane.remove(customer);
-                // Since the lane size changed, I need to remove/readd them to the appropriate
-                // lane queue:
-                if (expressLanes.contains(lane)) {
-                    expressLanes.remove(lane);
-                    expressLanes.offer(lane);
-                } else if (regularLanes.contains(lane)) {
-                    regularLanes.remove(lane);
-                    regularLanes.offer(lane);
-                }
 
-                // If there's another customer in the checkout lane:
-                if (customer.getCheckoutLane().size() > 0) {
-                    // Then set that customer as checking out and reQueue them in the eventQueue:
-                    Customer reQueue = customer.getCheckoutLane().peek();
-                    reQueue.setStatus(3);
-                    eventQueue.remove(reQueue);
-                    eventQueue.add(reQueue);
-                }
+                // The customer was checking out, and thus at the head of their lane's queue.
+                // They're done, remove them from their checkout lane:
+                customer.getCheckoutLane().remove();
+
+                // FIXME: Hacky attempt to bugfix:
+                // Since the lane size changed, I need to re-sort the lane queue:
+                ArrayList<Checkout> tempLanes = new ArrayList<>();
+                tempLanes.addAll(expressLanes);
+                expressLanes.clear();
+                expressLanes.addAll(tempLanes);
+                tempLanes.clear();
+                tempLanes.addAll(regularLanes);
+                regularLanes.clear();
+                regularLanes.addAll(tempLanes);
+                tempLanes.clear();
 
                 // This customer is ready to go home:
                 customer.setStatus(4);
