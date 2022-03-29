@@ -91,9 +91,9 @@ import java.util.Scanner;
 
 class Project3 {
     /* Variables */
-    private static String dataFileName = "./dataFiles/arrival.txt";
-    private static int checkoutLaneCount = 12; // total number of checkout lanes
-    private static int expressLaneCount = 4; // number of express lanes
+    private static String dataFileName = "./dataFiles/arrival medium.txt";
+    private static int checkoutLaneCount = 6; // total number of checkout lanes
+    private static int expressLaneCount = 2; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -133,19 +133,20 @@ class Project3 {
             if (customer.getStatus() == 0) {
                 // If that customer just arrived:
 
-                // Then set that customer's status to 1 and re-add them to the queue:
-                customer.setStatus(1); // Customer is now selecting items and filling their cart
-
                 // Print to event log:
                 System.out.println(String.format("%.2f: Arrival %s", currentTime, customer.getName()));
 
+                // Then set that customer's status to 1 and re-add them to the queue:
+                customer.setStatus(1); // Customer is now selecting items and filling their cart
+
             } else if (customer.getStatus() == 1) {
                 // If the customer was filling their cart:
-                // then that customer has finished and is ready to checkout:
-                customer.setStatus(2);
 
                 // Print to event log:
                 System.out.println(String.format("%.2f: Finished Shopping %s", currentTime, customer.getName()));
+
+                // then that customer has finished and is ready to checkout:
+                customer.setStatus(2);
 
                 // Select an appropriate checkout lane:
                 // If the customer has 12 or fewer items:
@@ -170,7 +171,7 @@ class Project3 {
                 if (customer.getCheckoutLane().size() > 1) {
                     // If the checkout lane has someone else in it:
                     // Set this customer's wait time:
-                    customer.setWaitTime(customer.getCheckoutLane().peek().getEventTime());
+                    customer.setWaitUntilTime(customer.getCheckoutLane().peek().getEventTime());
                 } else {
                     // If the checkout lane is empty, this customer starts checking out:
                     customer.setStatus(3);
@@ -180,15 +181,14 @@ class Project3 {
                 // If the customer was waiting to checkout:
 
                 // Check to see if they're still waiting:
-
                 // If this customer is next in line:
                 if (customer.getCheckoutLane().indexOf(customer) == 0) {
                     // Then they start checking out:
-                    customer.setWaitDuration(currentTime - customer.getEndShoppingTime());
+                    customer.setWaitDuration(currentTime - customer.readyToCheckoutTime());
                     customer.setStatus(3);
                 } else {
                     // Otherwise they wait for the first person in line to finish:
-                    customer.setWaitTime(customer.getCheckoutLane().peek().getEventTime());
+                    customer.setWaitUntilTime(customer.getCheckoutLane().peek().getEventTime());
                 }
             } else if (customer.getStatus() == 3) {
                 // If this customer was checking out:
@@ -197,11 +197,21 @@ class Project3 {
                 System.out.println(String.format(
                         "%.2f: Finished Checkout %s on %s (%.2f minute wait, %d people in line -- finished shopping at %.2f, got to the front of the line at %.2f)",
                         currentTime, customer.getName(), customer.getCheckoutLane(), customer.getWaitDuration(),
-                        (customer.getCheckoutLane().size() - 1), customer.getEndShoppingTime(),
-                        (customer.getEndShoppingTime() + customer.getWaitDuration())));
+                        (customer.getCheckoutLane().size() - 1), customer.readyToCheckoutTime(),
+                        (customer.readyToCheckoutTime() + customer.getWaitDuration())));
 
                 // Then this customer finishes checking out:
-                customer.getCheckoutLane().remove(customer);
+                Checkout lane = customer.getCheckoutLane();
+                lane.remove(customer);
+                // Since the lane size changed, I need to remove/readd them to the appropriate
+                // lane queue:
+                if (expressLanes.contains(lane)) {
+                    expressLanes.remove(lane);
+                    expressLanes.offer(lane);
+                } else if (regularLanes.contains(lane)) {
+                    regularLanes.remove(lane);
+                    regularLanes.offer(lane);
+                }
 
                 // If there's another customer in the checkout lane:
                 if (customer.getCheckoutLane().size() > 0) {
@@ -283,7 +293,7 @@ class Project3 {
         // If not express lanes:
         if (!express) {
             // Create the regular checkout lanes:
-            for (int i = 0; i < checkoutLaneCount - expressLaneCount; i++) {
+            for (int i = 0; i < (checkoutLaneCount - expressLaneCount); i++) {
                 q.offer(new RegularCheckout("Regular Checkout " + (i + 1)));
             }
         }
