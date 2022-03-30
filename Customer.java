@@ -11,10 +11,11 @@ public class Customer implements Comparable<Customer> {
     private int itemCount; // Order size (the number of items they purchase)
     private double averageSelectionDuration; // The average time it takes to select each item (total time spent browsing
                                              // divided by order size)
-    private double readyToCheckoutTime; // Time the customer finished filling their cart (in minutes relative to store
+    private double endShoppingTime; // Time the customer finished filling their cart (in minutes relative to store
     // opening)
+    private Double startCheckoutTime; // Time the customer starts checking out after waiting for others to finish, if
+                                      // any.
     private Double waitDuration; // Time the customer waited to start checking out, if any.
-    private Double waitUntilTime; // Time the customer is waiting for to check out if any.
     private Double checkoutDuration; // How long it took the customer to scan their items and pay for them.
     private int status; // Tracks what the customer's status is. See getStatus() method for details.
     private Checkout checkoutLane; // Tracks what lane the customer is in, if any.
@@ -27,13 +28,17 @@ public class Customer implements Comparable<Customer> {
         this.arrivalTime = arrivalTime;
         this.itemCount = orderSize;
         this.averageSelectionDuration = averageSelectionTime;
-        this.readyToCheckoutTime = arrivalTime + (this.itemCount * this.averageSelectionDuration);
         this.status = 0; // When first added to the event queue (loading of customer data), their status
                          // is 0, meaning they haven't entered the store yet.
-        this.waitUntilTime = null; // The following values start at null, in an effort to track down bugs.
-        this.checkoutDuration = null;
-        this.checkoutLane = null;
-        this.waitDuration = null;
+        this.endShoppingTime = arrivalTime + (this.itemCount * this.averageSelectionDuration);
+
+        // The following are null values for error checking purposes:
+        this.startCheckoutTime = null; // When the customer starts checking out, which may include waiting for others
+                                       // to finish first.
+        this.checkoutDuration = null; // How long it takes to checkout, determined by checkout lane type.
+        this.checkoutLane = null; // Track which checkout lane the customer is in (or was in).
+        this.waitDuration = null; // Track how long the customer had to wait for others to finish.
+
     }
 
     /* Methods */
@@ -58,12 +63,12 @@ public class Customer implements Comparable<Customer> {
         return checkoutDuration;
     }
 
-    public double getReadyToCheckoutTime() {
-        return readyToCheckoutTime;
+    public double getStartCheckoutTime() {
+        return startCheckoutTime;
     }
 
-    public Double getWaitUntilTime() {
-        return waitUntilTime;
+    public double getEndShoppingTime() {
+        return endShoppingTime;
     }
 
     public String getName() {
@@ -81,12 +86,6 @@ public class Customer implements Comparable<Customer> {
         // null: something went horribly wrong
 
         return status;
-    }
-
-    public double readyToCheckoutTime() {
-        // Returns the time the customer finishes filling their cart (relative to store
-        // opening):
-        return readyToCheckoutTime;
     }
 
     public double getEventTime() {
@@ -110,7 +109,7 @@ public class Customer implements Comparable<Customer> {
         // If their status is 2, they've finished filling their cart and are waiting on
         // others in their checkout lane:
         if (status == 2) {
-            returnTime = waitUntilTime;
+            returnTime = null;
         }
 
         // If their status is 3, they're currently checking out:
@@ -127,24 +126,12 @@ public class Customer implements Comparable<Customer> {
     }
 
     public void setStatus(int status) {
-        // Set's the customer's status:
         this.status = status;
+    }
 
-        // Calculate any important statistics:
-        if (status == 2) {
-            // When a customer is first set to ready to checkout, their waitTime (which is
-            // used to calculate their eventTime) is equal to their checkoutTime (the time
-            // they finished filling their carts):
-            waitUntilTime = readyToCheckoutTime;
-            // When a customer first gets set to ready to checkout, their waitDuration is
-            // initially 0.0:
-            waitDuration = 0.0;
-        }
-
-        // FIXME: Bugfix attempt:
-        if (status > 2) {
-            waitUntilTime = null;
-        }
+    public void setStartCheckoutTime(double startCheckoutTime) {
+        this.startCheckoutTime = startCheckoutTime;
+        this.waitDuration = this.startCheckoutTime - this.endShoppingTime;
     }
 
     public void setCheckoutDuration(double checkoutDuration) {
@@ -154,22 +141,9 @@ public class Customer implements Comparable<Customer> {
         this.checkoutDuration = checkoutDuration;
     }
 
-    public void setWaitDuration(double waitDuration) {
-        // Set the given customer's waitTime:
-        this.waitDuration = waitDuration;
-    }
-
     public void setCheckoutLane(Checkout checkout) {
         // Set the customer's checkout lane:
         this.checkoutLane = checkout;
-    }
-
-    public void setWaitUntilTime(double waitUntilTime) {
-        // Set this customer's waitTime to the given time value:
-        this.waitUntilTime = waitUntilTime;
-
-        // Update this customer's waitDuration as well:
-        waitDuration = waitUntilTime - readyToCheckoutTime;
     }
 
     @Override

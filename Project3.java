@@ -92,14 +92,15 @@ NOTES:
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
 class Project3 {
     /* Variables */
-    private static String dataFileName = "./dataFiles/arrival medium.txt";
-    private static int checkoutLaneCount = 6; // total number of checkout lanes
-    private static int expressLaneCount = 2; // number of express lanes
+    private static String dataFileName = "./dataFiles/arrival.txt";
+    private static int checkoutLaneCount = 12; // total number of checkout lanes
+    private static int expressLaneCount = 4; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -116,8 +117,8 @@ class Project3 {
         }
 
         // Create the checkout lanes:
-        PriorityQueue<Checkout> expressLanes = createCheckoutLanes(true); // true means create express lanes
-        PriorityQueue<Checkout> regularLanes = createCheckoutLanes(false); // false means create regular lanes
+        LinkedList<Checkout> expressLanes = createCheckoutLanes(true); // true means create express lanes
+        LinkedList<Checkout> regularLanes = createCheckoutLanes(false); // false means create regular lanes
 
         double currentTime = 0.0; // Track the current time (relative to store opening). This is essential for
                                   // tracking event times.
@@ -152,24 +153,51 @@ class Project3 {
                 System.out.println(String.format("%.2f: Finished Shopping %s", currentTime, customer.getName()));
 
                 // then that customer has finished and is ready to checkout:
-                customer.setStatus(2);
+                // FIXME: I'm removing status = 2, they should calculate the time they start
+                // checking out based on the LAST person in the queue, if any!
+                customer.setStatus(3);
 
                 // Select an appropriate checkout lane:
+                Customer customerAheadInLine = null; // Track any customer who might be ahead of the given customer:
+
                 // If the customer has 12 or fewer items:
                 if (customer.getItemCount() <= 12) {
                     // Then this customer can use an express lane.
 
-                    // If the express lanes have longer queues than regular lanes:
-                    if (expressLanes.peek().size() > regularLanes.peek().size()) {
-                        // Then this customer will use a regular lane:
-                        customerCheckout(customer, regularLanes);
-                    } else {
-                        // Otherwise this customer will use an express lane:
-                        customerCheckout(customer, expressLanes);
+                    // Look for the shortest lane appropriate for this customer:
+                    Checkout shortestLane = regularLanes.peek();
+                    for (Checkout c : regularLanes) {
+                        if (c.size() < shortestLane.size()) {
+                            shortestLane = c;
+                        }
                     }
+                    for (Checkout c : expressLanes) {
+                        if (c.size() <= shortestLane.size()) {
+                            shortestLane = c;
+                        }
+                    }
+
+                    // Add this customer to that lane: FIXME: Code duplication!
+                    if (shortestLane.size() > 0) {
+                        customerAheadInLine = shortestLane.getLast();
+                    }
+                    shortestLane.addLast(customer);
+                    customer.setCheckoutLane(shortestLane);
+                    customer.setCheckoutDuration(customer.getCheckoutLane().getCheckoutDuration(customer));
                 } else {
                     // Otherwise the customer must use a regular lane:
-                    customerCheckout(customer, regularLanes);
+                    Checkout shortestLane = regularLanes.peek();
+                    for (Checkout c : regularLanes) {
+                        if (c.size() < shortestLane.size()) {
+                            shortestLane = c;
+                        }
+                    }
+                    if (shortestLane.size() > 0) {
+                        customerAheadInLine = shortestLane.getLast();
+                    }
+                    shortestLane.addLast(customer);
+                    customer.setCheckoutLane(shortestLane);
+                    customer.setCheckoutDuration(customer.getCheckoutLane().getCheckoutDuration(customer));
                 }
 
                 // After adding the customer to a lane, check to see if the lane has another
@@ -177,30 +205,16 @@ class Project3 {
                 if (customer.getCheckoutLane().size() > 1) {
                     // If the checkout lane has someone else in it:
                     // Set this customer's wait time:
-                    customer.setWaitUntilTime(customer.getCheckoutLane().peek().getEventTime());
+                    customer.setStartCheckoutTime(customerAheadInLine.getEventTime());
                 } else {
                     // If the checkout lane is empty, this customer starts checking out:
-                    customer.setStatus(3);
+                    customer.setStartCheckoutTime(currentTime);
                 }
 
             } else if (customer.getStatus() == 2) {
-                // If the customer was waiting to checkout:
+                // FIXME: This status is being removed!
+                System.out.println("ERROR: STATUS 2 IS BEING REMOVED, FIXME!");
 
-                // Problem: Eventually multiple customers with status 2 get stuck at the head of
-                // the event queue, creating an endless loop. This means there's multiple
-                // customers waiting to check out in the eventQueue, but the one at the top of
-                // the queue isn't at the top of the eventQueue.
-
-                // Check to see if they're still waiting:
-                // If this customer is next in line:
-                if (customer.getCheckoutLane().indexOf(customer) == 0) {
-                    // Then they start checking out:
-                    customer.setWaitDuration(currentTime - customer.readyToCheckoutTime());
-                    customer.setStatus(3);
-                } else {
-                    // Otherwise they wait for the first person in line to finish:
-                    customer.setWaitUntilTime(customer.getCheckoutLane().peek().getEventTime());
-                }
             } else if (customer.getStatus() == 3) {
                 // If this customer was checking out:
 
@@ -208,8 +222,8 @@ class Project3 {
                 System.out.println(String.format(
                         "%.2f: Finished Checkout %s on %s (%.2f minute wait, %d people in line -- finished shopping at %.2f, got to the front of the line at %.2f)",
                         currentTime, customer.getName(), customer.getCheckoutLane(), customer.getWaitDuration(),
-                        (customer.getCheckoutLane().size() - 1), customer.readyToCheckoutTime(),
-                        (customer.readyToCheckoutTime() + customer.getWaitDuration())));
+                        (customer.getCheckoutLane().size() - 1), customer.getEndShoppingTime(),
+                        (customer.getStartCheckoutTime())));
 
                 // Then this customer finishes checking out:
 
@@ -217,36 +231,9 @@ class Project3 {
                 // They're done, remove them from their checkout lane:
                 customer.getCheckoutLane().remove();
 
-                // FIXME: Hacky attempt to bugfix:
-                // Since the lane size changed, I need to re-sort the lane queue:
-                ArrayList<Checkout> tempLanes = new ArrayList<>();
-                tempLanes.addAll(expressLanes);
-                expressLanes.clear();
-                expressLanes.addAll(tempLanes);
-                tempLanes.clear();
-                tempLanes.addAll(regularLanes);
-                regularLanes.clear();
-                regularLanes.addAll(tempLanes);
-                tempLanes.clear();
-
                 // This customer is ready to go home:
                 customer.setStatus(4);
             }
-
-            // FIXME: Hacky fixes:
-            // Check to make sure the customer at the front of each lane is set to checkout:
-            for (Checkout checkout : regularLanes) {
-                if (checkout.size() > 0) {
-                    checkout.peek().setStatus(3);
-                }
-            }
-            for (Checkout checkout : expressLanes) {
-                if (checkout.size() > 0) {
-                    checkout.peek().setStatus(3);
-                }
-            }
-            // Resort the eventQueue with the power of modern computing brute force:
-            resortEventQueue(eventQueue);
 
             // If this customer has more to do:
             if (customer.getStatus() < 4) {
@@ -305,12 +292,12 @@ class Project3 {
         return customerList;
     }
 
-    private static PriorityQueue<Checkout> createCheckoutLanes(boolean express) {
+    private static LinkedList<Checkout> createCheckoutLanes(boolean express) {
         // Creates and returns a PriorityQueue of the store's checkout lanes.
         // If true, create express lanes. If false, create regular lanes.
 
         // Create a PriorityQueue to hold the checkout lanes:
-        PriorityQueue<Checkout> q = new PriorityQueue<>();
+        LinkedList<Checkout> q = new LinkedList<>();
 
         // If not express lanes:
         if (!express) {
@@ -331,49 +318,4 @@ class Project3 {
         return q;
     }
 
-    private static void customerCheckout(Customer customer, PriorityQueue<Checkout> checkoutLanes) {
-        // Add the given customer to a lane in the given PriorityQueue of lanes.
-        // In order to properly sort, a checkout lane must be polled out, have a
-        // customer added, then offered back to the queue.
-
-        // Pull a checkout lane from the queue of lanes:
-        Checkout checkout = checkoutLanes.poll();
-
-        // Add the given customer to that lane:
-        checkout.offer(customer);
-
-        // Set the customer's checkout lane:
-        customer.setCheckoutLane(checkout);
-
-        // Add the checkout lane back to the queue:
-        checkoutLanes.offer(checkout);
-
-        // Set the customer's checkoutDuration based on that checkout lane's type:
-        customer.setCheckoutDuration(checkout.getCheckoutDuration(customer));
-
-        // Print to event log:
-        if (customer.getItemCount() <= 12) {
-            System.out.println("  12 or fewer, chose " + customer.getCheckoutLane());
-        } else {
-            System.out.println("  More than 12, chose " + customer.getCheckoutLane());
-        }
-    }
-
-    private static PriorityQueue<Customer> resortEventQueue(PriorityQueue<Customer> q) {
-        // The problem: It's difficult to update the position of objects inside a
-        // PriorityQueue that are not at the head/tail.
-        // The (hacky) solution: Just recreate the PriorityQueue. Yes, it's far from
-        // ideal, but I'm short on time and just want to get this working.
-
-        // Take the given PriorityQueue, move all the objects in it to a temporary
-        // ArrayList, then add them back. This is a brute-force tactic, and far from
-        // ideal, but I need results, and this is faster and easier than refactoring all
-        // my code.
-
-        ArrayList<Customer> tempQueue = new ArrayList<>();
-        tempQueue.addAll(q);
-        q.clear();
-        q.addAll(tempQueue);
-        return q;
-    }
 }
