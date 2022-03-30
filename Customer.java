@@ -190,9 +190,9 @@ public class Customer implements Comparable<Customer> {
             // These customers have the same wait time.
             // Compare the customer's status, giving priority to the higher number:
             if (this.getStatus() < other.getStatus()) {
-                return -1;
-            } else if (this.getStatus() > other.getStatus()) {
                 return 1;
+            } else if (this.getStatus() > other.getStatus()) {
+                return -1;
             } else {
                 // A customer at the front of their lane should go first:
                 if (this.getStatus() == 2 && other.getStatus() == 2) {

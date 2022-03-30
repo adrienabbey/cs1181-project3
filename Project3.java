@@ -233,6 +233,21 @@ class Project3 {
                 customer.setStatus(4);
             }
 
+            // FIXME: Hacky fixes:
+            // Check to make sure the customer at the front of each lane is set to checkout:
+            for (Checkout checkout : regularLanes) {
+                if (checkout.size() > 0) {
+                    checkout.peek().setStatus(3);
+                }
+            }
+            for (Checkout checkout : expressLanes) {
+                if (checkout.size() > 0) {
+                    checkout.peek().setStatus(3);
+                }
+            }
+            // Resort the eventQueue with the power of modern computing brute force:
+            resortEventQueue(eventQueue);
+
             // If this customer has more to do:
             if (customer.getStatus() < 4) {
                 // Then add this customer back into the event queue:
@@ -342,5 +357,23 @@ class Project3 {
         } else {
             System.out.println("  More than 12, chose " + customer.getCheckoutLane());
         }
+    }
+
+    private static PriorityQueue<Customer> resortEventQueue(PriorityQueue<Customer> q) {
+        // The problem: It's difficult to update the position of objects inside a
+        // PriorityQueue that are not at the head/tail.
+        // The (hacky) solution: Just recreate the PriorityQueue. Yes, it's far from
+        // ideal, but I'm short on time and just want to get this working.
+
+        // Take the given PriorityQueue, move all the objects in it to a temporary
+        // ArrayList, then add them back. This is a brute-force tactic, and far from
+        // ideal, but I need results, and this is faster and easier than refactoring all
+        // my code.
+
+        ArrayList<Customer> tempQueue = new ArrayList<>();
+        tempQueue.addAll(q);
+        q.clear();
+        q.addAll(tempQueue);
+        return q;
     }
 }
