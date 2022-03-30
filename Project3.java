@@ -97,7 +97,7 @@ import java.util.Scanner;
 
 class Project3 {
     /* Variables */
-    private static String dataFileName = "./dataFiles/arrival.txt";
+    private static String dataFileName = "./dataFiles/arrival medium.txt";
     private static int checkoutLaneCount = 6; // total number of checkout lanes
     private static int expressLaneCount = 2; // number of express lanes
 
@@ -185,6 +185,11 @@ class Project3 {
 
             } else if (customer.getStatus() == 2) {
                 // If the customer was waiting to checkout:
+
+                // Problem: Eventually multiple customers with status 2 get stuck at the head of
+                // the event queue, creating an endless loop. This means there's multiple
+                // customers waiting to check out in the eventQueue, but the one at the top of
+                // the queue isn't at the top of the eventQueue.
 
                 // Check to see if they're still waiting:
                 // If this customer is next in line:

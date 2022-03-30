@@ -140,6 +140,11 @@ public class Customer implements Comparable<Customer> {
             // initially 0.0:
             waitDuration = 0.0;
         }
+
+        // FIXME: Bugfix attempt:
+        if (status > 2) {
+            waitUntilTime = null;
+        }
     }
 
     public void setCheckoutDuration(double checkoutDuration) {
@@ -172,6 +177,11 @@ public class Customer implements Comparable<Customer> {
         // Look at the customer's current status to determine what their position in the
         // event queue should be in comparison to other customers.
 
+        // Problem: There can be multiple customers waiting to check out at the head of
+        // the eventQueue. I need to sort based on their position in their respective
+        // lanes. If they have the same eventTime and the same status, check their lane
+        // position.
+
         if (this.getEventTime() > other.getEventTime()) {
             return 1;
         } else if (this.getEventTime() < other.getEventTime()) {
@@ -180,22 +190,21 @@ public class Customer implements Comparable<Customer> {
             // These customers have the same wait time.
             // Compare the customer's status, giving priority to the higher number:
             if (this.getStatus() < other.getStatus()) {
-                return 1;
-            } else if (this.getStatus() > other.getStatus()) {
                 return -1;
+            } else if (this.getStatus() > other.getStatus()) {
+                return 1;
             } else {
+                // A customer at the front of their lane should go first:
+                if (this.getStatus() == 2 && other.getStatus() == 2) {
+                    if (this.getCheckoutLane().peek() == this) {
+                        return -1;
+                    }
+                    if (other.getCheckoutLane().peek() == other) {
+                        return 1;
+                    }
+                }
                 return 0;
             }
-
-            // If the other customer is checking out and this one is waiting to check out:
-            // if ((this.getStatus() == 2) && (other.getStatus() == 3)) {
-            // // Then the other customer takes priority:
-            // return 1;
-            // } else if ((this.getStatus() == 3) && (other.getStatus() == 2)) {
-            // return -1;
-            // } else {
-            // return 0;
-            // }
         }
     }
 }
