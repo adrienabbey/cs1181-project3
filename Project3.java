@@ -100,7 +100,7 @@ class Project3 {
     /* Variables */
     private static String dataFileName = "./dataFiles/arrival.txt";
     private static int checkoutLaneCount = 12; // total number of checkout lanes
-    private static int expressLaneCount = 4; // number of express lanes
+    private static int expressLaneCount = 3; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -210,7 +210,12 @@ class Project3 {
                     // If the checkout lane is empty, this customer starts checking out:
                     customer.setStartCheckoutTime(currentTime);
                 }
-
+                // Print to event log:
+                if (customer.getItemCount() <= 12) {
+                    System.out.println("  12 or fewer, chose " + customer.getCheckoutLane());
+                } else {
+                    System.out.println("  More than 12, chose " + customer.getCheckoutLane());
+                }
             } else if (customer.getStatus() == 2) {
                 // FIXME: This status is being removed!
                 System.out.println("ERROR: STATUS 2 IS BEING REMOVED, FIXME!");
@@ -245,11 +250,14 @@ class Project3 {
         // Print out the average wait time for all customers:
         double avgWaitDuration = 0.0;
         double avgCheckoutDuration = 0.0;
+        double avgOrderSize = 0.0;
         int customerCount = customerList.size();
         for (Customer c : customerList) {
             avgWaitDuration += c.getWaitDuration();
             avgCheckoutDuration += c.getCheckoutDuration();
+            avgOrderSize += c.getItemCount();
         }
+        System.out.println(String.format("Average order size: %.3f", (avgOrderSize / customerCount)));
         System.out.println(String.format("Average checkout time: %.3f", (avgCheckoutDuration / customerCount)));
         System.out.println(String.format("Average wait time: %.3f", (avgWaitDuration / customerCount)));
     }
