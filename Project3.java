@@ -87,6 +87,14 @@ NOTES:
     would remove a specific object, but all it did was remove the head.  Then
     when I went to readd that object, it just created duplicates of an existing
     object.
+
+TODO:
+  - Resolve code duplication.
+  - Statistic gathering.
+  - Check grading outline.
+  - Write document.
+  - Remove unused methods.
+  - Code review.
 */
 
 import java.io.File;
