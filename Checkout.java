@@ -6,10 +6,12 @@
 
 import java.util.LinkedList;
 
-public abstract class Checkout extends LinkedList<Customer> implements Comparable<Checkout> {
+public abstract class Checkout extends LinkedList<Customer> {
 
     /* Methods */
 
+    // Abstract method needed to calculate how long a customer takes checking out
+    // their items.
     public abstract Double getCheckoutDuration(Customer customer);
 
 }

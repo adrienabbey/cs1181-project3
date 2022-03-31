@@ -152,13 +152,13 @@ class Project3 {
                 // Print to event log:
                 System.out.println(String.format("%.2f: Finished Shopping %s", currentTime, customer.getName()));
 
-                // then that customer has finished and is ready to checkout:
-                // FIXME: I'm removing status = 2, they should calculate the time they start
-                // checking out based on the LAST person in the queue, if any!
-                customer.setStatus(3);
+                // Then that customer has finished and is ready to checkout:
+                customer.setStatus(2);
 
                 // Select an appropriate checkout lane:
-                Customer customerAheadInLine = null; // Track any customer who might be ahead of the given customer:
+
+                // Track any customer who might be ahead of the given customer:
+                Customer customerAheadInLine = null;
 
                 // If the customer has 12 or fewer items:
                 if (customer.getItemCount() <= 12) {
@@ -166,18 +166,21 @@ class Project3 {
 
                     // Look for the shortest lane appropriate for this customer:
                     Checkout shortestLane = regularLanes.peek();
+                    // FIXME: code duplication!
                     for (Checkout c : regularLanes) {
                         if (c.size() < shortestLane.size()) {
                             shortestLane = c;
                         }
                     }
+                    // FIXME: This might constantly change equal length lanes, fix?
                     for (Checkout c : expressLanes) {
                         if (c.size() <= shortestLane.size()) {
                             shortestLane = c;
                         }
                     }
 
-                    // Add this customer to that lane: FIXME: Code duplication!
+                    // Add this customer to that lane:
+                    // FIXME: Code duplication!
                     if (shortestLane.size() > 0) {
                         customerAheadInLine = shortestLane.getLast();
                     }
@@ -217,10 +220,6 @@ class Project3 {
                     System.out.println("  More than 12, chose " + customer.getCheckoutLane());
                 }
             } else if (customer.getStatus() == 2) {
-                // FIXME: This status is being removed!
-                System.out.println("ERROR: STATUS 2 IS BEING REMOVED, FIXME!");
-
-            } else if (customer.getStatus() == 3) {
                 // If this customer was checking out:
 
                 // Print to event log:
@@ -237,17 +236,17 @@ class Project3 {
                 customer.getCheckoutLane().remove();
 
                 // This customer is ready to go home:
-                customer.setStatus(4);
+                customer.setStatus(3);
             }
 
             // If this customer has more to do:
-            if (customer.getStatus() < 4) {
+            if (customer.getStatus() < 3) {
                 // Then add this customer back into the event queue:
                 eventQueue.offer(customer);
             }
         }
 
-        // Print out the average wait time for all customers:
+        // Print out statistics for this simulation:
         double avgWaitDuration = 0.0;
         double avgCheckoutDuration = 0.0;
         double avgOrderSize = 0.0;

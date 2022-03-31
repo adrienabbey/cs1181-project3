@@ -80,9 +80,8 @@ public class Customer implements Comparable<Customer> {
         // Returns the customer's current status:
         // 0: customer hasn't entered the store yet
         // 1: customer is currently selecting items and filling their cart
-        // 2: customer finished filling their cart and is waiting in line to checkout
-        // 3: customer has started checking out
-        // 4: customer has finished checking out
+        // 2: customer is in a checkout lane
+        // 3: customer has finished and left the store
         // null: something went horribly wrong
 
         return status;
@@ -90,7 +89,7 @@ public class Customer implements Comparable<Customer> {
 
     public double getEventTime() {
         // Looks at the customer's current status and calculates when the time of their
-        // next event.
+        // NEXT event.
 
         Double returnTime = null;
 
@@ -106,19 +105,13 @@ public class Customer implements Comparable<Customer> {
             returnTime = arrivalTime + (itemCount * averageSelectionDuration);
         }
 
-        // If their status is 2, they've finished filling their cart and are waiting on
-        // others in their checkout lane:
+        // If their status is 2, they're currently checking out:
         if (status == 2) {
-            returnTime = null;
-        }
-
-        // If their status is 3, they're currently checking out:
-        if (status == 3) {
             returnTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
-        // If their status is 4, they've finished checking out and left the store:
-        if (status == 4) {
+        // If their status is 3, they've finished checking out and left the store:
+        if (status == 3) {
             returnTime = arrivalTime + (itemCount * averageSelectionDuration) + waitDuration + checkoutDuration;
         }
 
@@ -130,19 +123,22 @@ public class Customer implements Comparable<Customer> {
     }
 
     public void setStartCheckoutTime(double startCheckoutTime) {
+        // Sets the time when the customer can start checking out
         this.startCheckoutTime = startCheckoutTime;
+        // With this time, their wait duration can also be calculated
         this.waitDuration = this.startCheckoutTime - this.endShoppingTime;
     }
 
     public void setCheckoutDuration(double checkoutDuration) {
-        // How long the customer spent scanning and paying for their items in checkout
-        // (dependant on order size and lane type). Note, the lane they use determines
-        // this timing:
+        // Sets how long the customer spent scanning and paying for their items in
+        // checkout (dependant on order size and lane type). Note, the lane they use
+        // determines this timing:
         this.checkoutDuration = checkoutDuration;
     }
 
     public void setCheckoutLane(Checkout checkout) {
-        // Set the customer's checkout lane:
+        // Set the customer's checkout lane (for tracking purposes, not the same as
+        // adding the customer to the lane):
         this.checkoutLane = checkout;
     }
 

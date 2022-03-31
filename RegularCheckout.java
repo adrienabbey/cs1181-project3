@@ -25,13 +25,10 @@ public class RegularCheckout extends Checkout {
     }
 
     @Override
-    public int compareTo(Checkout other) {
-        // Compare the checkout lane queue sizes:
-        return this.size() - other.size();
-    }
-
-    @Override
     public String toString() {
+        // Used for event logging, return the lane name and how many people are in the
+        // lane, minus one (to replicate example log data, likely intended to show how
+        // many OTHER people are in the lane)
         return name + " (" + (size() - 1) + ")";
     }
 }
