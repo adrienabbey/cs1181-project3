@@ -19,6 +19,7 @@ public class Customer implements Comparable<Customer> {
     private Double checkoutDuration; // How long it took the customer to scan their items and pay for them.
     private int status; // Tracks what the customer's status is. See getStatus() method for details.
     private Checkout checkoutLane; // Tracks what lane the customer is in, if any.
+    private int checkoutLaneLength; // Track how long the customer's checkout lane was before they joined it.
 
     /* Constructor */
 
@@ -43,9 +44,9 @@ public class Customer implements Comparable<Customer> {
 
     /* Methods */
 
-    public double getArrivalTime() {
-        return arrivalTime;
-    }
+    // public double getArrivalTime() {
+    //     return arrivalTime;
+    // }
 
     public int getItemCount() {
         return itemCount;
@@ -139,7 +140,13 @@ public class Customer implements Comparable<Customer> {
     public void setCheckoutLane(Checkout checkout) {
         // Set the customer's checkout lane (for tracking purposes, not the same as
         // adding the customer to the lane):
+        this.checkoutLaneLength = checkout.size();
         this.checkoutLane = checkout;
+    }
+
+    public int getCheckoutLaneLength() {
+        // Returns the length of the customer's checkout lane when they joined it:
+        return checkoutLaneLength;
     }
 
     @Override

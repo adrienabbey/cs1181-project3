@@ -89,11 +89,8 @@ NOTES:
     object.
 
 TODO:
-  - Resolve code duplication.
-  - Statistic gathering.
   - Check grading outline.
   - Write document.
-  - Remove unused methods.
   - Code review.
 */
 
@@ -174,13 +171,11 @@ class Project3 {
 
                     // Look for the shortest lane appropriate for this customer:
                     Checkout shortestLane = regularLanes.peek();
-                    // FIXME: code duplication!
                     for (Checkout c : regularLanes) {
                         if (c.size() < shortestLane.size()) {
                             shortestLane = c;
                         }
                     }
-                    // FIXME: This might constantly change equal length lanes, fix?
                     for (Checkout c : expressLanes) {
                         if (c.size() <= shortestLane.size()) {
                             shortestLane = c;
@@ -188,7 +183,6 @@ class Project3 {
                     }
 
                     // Add this customer to that lane:
-                    // FIXME: Code duplication!
                     if (shortestLane.size() > 0) {
                         customerAheadInLine = shortestLane.getLast();
                     }
@@ -225,9 +219,9 @@ class Project3 {
                 }
                 // Print to event log:
                 if (customer.getItemCount() <= 12) {
-                    System.out.println("  12 or fewer, chose " + customer.getCheckoutLane());
+                    System.out.println("    12 or fewer, chose " + customer.getCheckoutLane());
                 } else {
-                    System.out.println("  More than 12, chose " + customer.getCheckoutLane());
+                    System.out.println("    More than 12, chose " + customer.getCheckoutLane());
                 }
             } else if (customer.getStatus() == 2) {
                 // If this customer was checking out:
@@ -245,6 +239,12 @@ class Project3 {
                 // They're done, remove them from their checkout lane:
                 customer.getCheckoutLane().remove();
 
+                // Print to event log, next customer starts checking out, if any:
+                if (customer.getCheckoutLane().size() > 0) {
+                    System.out.println(
+                            "    " + customer.getCheckoutLane().peek().getName() + " has started checking out.");
+                }
+
                 // This customer is ready to go home:
                 customer.setStatus(3);
             }
@@ -261,6 +261,7 @@ class Project3 {
         double avgWaitDuration = 0.0;
         double avgCheckoutDuration = 0.0;
         double avgOrderSize = 0.0;
+        double avgLaneLength = 0.0;
         int customerCount = customerList.size();
 
         // Gather statistics from each customer:
@@ -268,6 +269,7 @@ class Project3 {
             avgWaitDuration += c.getWaitDuration();
             avgCheckoutDuration += c.getCheckoutDuration();
             avgOrderSize += c.getItemCount();
+            avgLaneLength += c.getCheckoutLaneLength();
             c.getCheckoutLane().addCustomerCount();
         }
 
@@ -291,6 +293,8 @@ class Project3 {
         System.out.println(String.format("Average order size: %.2f items", (avgOrderSize / customerCount)));
         System.out.println(
                 String.format("Average checkout duration: %.2f minutes", (avgCheckoutDuration / customerCount)));
+        System.out.println(String.format("Average checkout lane length: %.2f customers in the lane before joining",
+                (avgLaneLength / customerCount)));
         System.out.println();
         for (Checkout c : regularLanes) {
             System.out.println("    " + c.getName() + "'s number of customers served: " + c.getCustomerCount());
