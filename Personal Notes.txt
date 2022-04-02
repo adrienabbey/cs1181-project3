@@ -1,0 +1,112 @@
+customerArrival: 
+	pull Customer from ArrivalQueue
+	schedule to end shopping -> add to CheckoutQueue
+	schedule next arrival
+customerEndShoppingPicksLane:
+	Place customer in shortest checkout lane applicable
+		if 12 or fewer, shortest lane of any type
+			if a tie, prefer express
+		if more than 12, shortest regular lane only
+	If lane empty, schedule finished time
+	If lane busy, add to appropriate queue
+customerEndsCheckout
+	Remove Customer from system, save relevant statistical information
+	If more customers in checkout lane, schedule the next customer to finish
+	
+Analysis Information:
+	Customer Number
+	Arrival Time
+	End Shopping Time
+	End Waiting Time
+	End Checkout Time
+	
+Other Information to Consider:
+	Total customers served
+	Average queue lengths (possibly as perceived by customers)
+	Average wait time per line/customer
+	Total customers in each queue
+	Max length of each queue
+	etc
+	
+End goal:
+	Adjust mix of regular and express lanes (max 12 total)
+	Minimize the time customers wait in line
+	Consider closing lanes (each lane costs money to operate)
+	How much longer would customers have to wait if one or more lanes were closed?
+	
+	Event Queue:
+	Instead of sorting based on a fixed data type, have a variable for each customer that sets their current status (arrived, readyForCheckout, inCheckoutLane, doneShopping)
+	Add customers with "arrived" status to the event queue, which sorts them based on arrival time
+	'Poll' the queue when ready, pulling said customer out.  
+		If they already "arrived" set them to "readyForCheckout" and add back to the event queue (changing their EventQueue position).
+		If they were already "readyForCheckout", set them to "inCheckoutLane" and assign them to a checkoutLane.  If that lane is empty, set them to "doneShopping".
+
+
+Checkout Lanes:
+	If the customer has 12 or fewer items, pick the lane with the shortest queue.
+		If there's a tie between express and regular lanes, pick an express lane
+	If the customer has more than 12 items, pick the shortest regular lane
+	
+	If there's multiple people in a checkout lane, waitDuration must be calculated:
+		All customers have a fixed endShoppingTime, which puts them in a lane. 
+			(start time)
+		All customers have a fixed checkoutDuration, determined by the lane they join.
+			(checkoutDuration is based on how long they must wait for those ahead of them to finish checking out)
+		To calculate waitDuration:
+			If no customers in lane when joining, 0.0 wait time.
+			If others ahead in queue when joining:
+			
+			
+VERIFY:
+	
+
+FIXME:
+	Make more accurate data collection for statistics and error checking
+		Accurate display of time
+	Checkout lane queues need work
+		Should have more people needing to wait
+		Should reflect in customer's waitTime
+	Verify waitTime accuracy
+	
+	
+	Serving customer #55 (lowest eventTime)
+Current time: 34.64 (#55's eventTime)
+	#392 is in front of checkout queue
+		#392's eventTime is 37.69
+			#55 needs to wait until 37.70 to act!
+	#55's new eventTime is (arrivalTime + shopTime + waitDuration)
+		WRONG WRONG WRONG
+			Should be #392's eventTime + 0.01
+			#55's previous waitDuration was 0.54
+			Current time is 34.64
+				arrivalTime + shopTime + 0.54
+			Target time is 37.69
+				waitDuration should be 
+				
+			CALCULATE USING THIS CUSTOMER'S ENDSHOPPINGTIME
+			
+			this.customer.endshoppingtime + this.customer.waittime = other.customer.eventTime
+			this.customer.waittime = othercustomereventtime - this.customerendshoppingtime + 0.01
+			
+			
+SUPERIOR FIXES:
+	Instead of constantly shuffling customer statuses:
+	SET TIME OF CHECKOUT FINISH BASED ON WHEN THE LANE FINISHES
+		When adding a customer to a lane, calculate when they'll finish based on WHEN the LAST person in the lane will finish
+		Why this is superior: NO MORE NEEDING TO RESORT THE QUEUE
+	Instead of treating all lanes as a PriorityQueue:
+		Just iterate through the list of lanes, and pick the one with the shortest length.  No more PriorityQueue BS!
+
+		
+Analysis:
+	Total customers served
+	Lane counts (number of each type, total lane count)
+	
+	Average wait duration
+	Average checkout duration
+	Average order size
+	
+	Average lane length (ie how long lanes look when customers start checking out)
+	Customers served by each lane
+	Max length of each lane
+	Number of customers with 12 or fewer items that went through a regular lane

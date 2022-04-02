@@ -70,28 +70,6 @@ NOTES:
     their 'status', which in turn adjusts their compareTo value.  If they 
     still have more to do, I put them back into the queue which sorts them 
     using their new compareTo value.
-  - Because of how I handle the eventQueue timing of lanes with more than one 
-    customer (I look at the time when the front of the queue will finish 
-    checking out and set each customer to act after that), there will be a very
-    small change in queue times, which hopefully will be accepted as a rounding
-    error.  I know it's not ideal, and there's likely a better solution than
-    what I picked, but I don't want to go back and refactor all my code to fix
-    this.
-  - The instruction PDF states that "customers will always select the checkout 
-    area with the shortest number of other customers in line".  The in-class 
-    description suggested otherwise.  I'm going to assume it's safe to use the 
-    method described in the PDF instead.
-  - I spent DAYS trying to figure out why my code was buggy.  Turns out I can't
-    easily resort a PriorityQueue when the sorting of specific objects change
-    in the middle of that list.  I thought PriorityQueueObj.remove(specificObj)
-    would remove a specific object, but all it did was remove the head.  Then
-    when I went to readd that object, it just created duplicates of an existing
-    object.
-
-TODO:
-  - Check grading outline.
-  - Write document.
-  - Code review.
 */
 
 import java.io.File;
@@ -104,8 +82,8 @@ import java.util.Scanner;
 class Project3 {
     /* Variables */
     private static String dataFileName = "./dataFiles/arrival.txt";
-    private static int checkoutLaneCount = 12; // total number of checkout lanes
-    private static int expressLaneCount = 3; // number of express lanes
+    private static int checkoutLaneCount = 13; // total number of checkout lanes
+    private static int expressLaneCount = 4; // number of express lanes
 
     public static void main(String[] args) {
         // Load the customer data:
@@ -259,6 +237,7 @@ class Project3 {
         // Calculate statistics for this simulation:
         int customersServed = 0;
         double avgWaitDuration = 0.0;
+        double maxWaitDuration = 0.0;
         double avgCheckoutDuration = 0.0;
         double avgOrderSize = 0.0;
         double avgLaneLength = 0.0;
@@ -267,6 +246,9 @@ class Project3 {
         // Gather statistics from each customer:
         for (Customer c : customerList) {
             avgWaitDuration += c.getWaitDuration();
+            if (c.getWaitDuration() > maxWaitDuration) {
+                maxWaitDuration = c.getWaitDuration();
+            }
             avgCheckoutDuration += c.getCheckoutDuration();
             avgOrderSize += c.getItemCount();
             avgLaneLength += c.getCheckoutLaneLength();
@@ -285,17 +267,6 @@ class Project3 {
         // variables, I feel it might be worthwhile to instead use other methods, as
         // that might show any errors I might have in my code:
         System.out.println();
-        System.out.println("There were " + customersServed + " customers served.");
-        System.out.println("There were " + regularLanes.size() + " regular lanes and " + expressLanes.size()
-                + " express lanes, giving " + (expressLanes.size() + regularLanes.size()) + " total lanes open.");
-        System.out.println();
-        System.out.println(String.format("Average wait duration: %.2f minutes", (avgWaitDuration / customerCount)));
-        System.out.println(String.format("Average order size: %.2f items", (avgOrderSize / customerCount)));
-        System.out.println(
-                String.format("Average checkout duration: %.2f minutes", (avgCheckoutDuration / customerCount)));
-        System.out.println(String.format("Average checkout lane length: %.2f customers in the lane before joining",
-                (avgLaneLength / customerCount)));
-        System.out.println();
         for (Checkout c : regularLanes) {
             System.out.println("    " + c.getName() + "'s number of customers served: " + c.getCustomerCount());
             System.out.println("    " + c.getName() + "'s max queue size: " + c.getMaxQueueSize());
@@ -304,6 +275,22 @@ class Project3 {
             System.out.println("    " + c.getName() + "'s number of customers served: " + c.getCustomerCount());
             System.out.println("    " + c.getName() + "'s max queue size: " + c.getMaxQueueSize());
         }
+
+        System.out.println();
+        System.out.println("There were " + regularLanes.size() + " regular lanes and " + expressLanes.size()
+                + " express lanes, giving " + (expressLanes.size() + regularLanes.size()) + " total lanes open.");
+        System.out.println(String.format("  Average order size: %.2f items among %s customers total",
+                (avgOrderSize / customerCount), customersServed));
+        System.out.println();
+        System.out.println(String.format("  Average wait duration: %.2f minutes", (avgWaitDuration / customerCount)));
+        System.out.println(String.format("  Max wait duration: %.2f minutes", maxWaitDuration));
+        System.out.println();
+        System.out.println(String.format("  Average checkout lane length: %.2f customers in the lane before joining",
+                (avgLaneLength / customerCount)));
+        System.out.println(
+                String.format("  Average checkout duration: %.2f minutes", (avgCheckoutDuration / customerCount)));
+
+        System.out.println();
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {

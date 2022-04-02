@@ -1,0 +1,158 @@
+arrival.txt:
+
+===============================================================================
+
+There were 9 regular lanes and 3 express lanes, giving 12 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 12.77 minutes
+  Max wait duration: 37.69 minutes
+
+  Average checkout lane length: 5.07 customers in the lane before joining
+  Average checkout duration: 2.92 minutes
+
+-------------------------------------------------------------------------------
+
+There were 10 regular lanes and 2 express lanes, giving 12 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 17.53 minutes
+  Max wait duration: 45.57 minutes
+
+  Average checkout lane length: 7.02 customers in the lane before joining
+  Average checkout duration: 3.00 minutes
+  
+-------------------------------------------------------------------------------  
+  
+There were 8 regular lanes and 4 express lanes, giving 12 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 33.66 minutes
+  Max wait duration: 117.23 minutes
+
+  Average checkout lane length: 10.09 customers in the lane before joining
+  Average checkout duration: 2.91 minutes
+  
+===============================================================================
+  
+There were 8 regular lanes and 3 express lanes, giving 11 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 36.14 minutes
+  Max wait duration: 119.30 minutes
+
+  Average checkout lane length: 11.38 customers in the lane before joining
+  Average checkout duration: 2.92 minutes
+ 
+-------------------------------------------------------------------------------
+  
+There were 9 regular lanes and 2 express lanes, giving 11 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 44.18 minutes
+  Max wait duration: 112.96 minutes
+
+  Average checkout lane length: 15.89 customers in the lane before joining
+  Average checkout duration: 2.99 minutes
+  
+-------------------------------------------------------------------------------
+  
+There were 7 regular lanes and 4 express lanes, giving 11 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 65.48 minutes
+  Max wait duration: 231.70 minutes
+
+  Average checkout lane length: 18.44 customers in the lane before joining
+  Average checkout duration: 2.91 minutes
+	
+===============================================================================	
+
+There were 10 regular lanes and 3 express lanes, giving 13 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 2.18 minutes
+  Max wait duration: 12.23 minutes
+
+  Average checkout lane length: 1.87 customers in the lane before joining
+  Average checkout duration: 2.95 minutes
+
+-------------------------------------------------------------------------------
+
+There were 11 regular lanes and 2 express lanes, giving 13 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 2.40 minutes
+  Max wait duration: 13.08 minutes
+
+  Average checkout lane length: 1.98 customers in the lane before joining
+  Average checkout duration: 3.01 minutes
+  
+-------------------------------------------------------------------------------
+
+There were 9 regular lanes and 4 express lanes, giving 13 total lanes open.
+  Average order size: 23.88 items among 3000 customers total
+
+  Average wait duration: 9.85 minutes
+  Max wait duration: 31.41 minutes
+
+  Average checkout lane length: 3.84 customers in the lane before joining
+  Average checkout duration: 2.91 minutes
+
+===============================================================================	
+	
+	
+	12 lanes, 3 express, 9 regular:
+		There were 3000 customers served.
+		There were 9 regular lanes and 3 express lanes, giving 12 total lanes open.
+
+		Average wait duration: 12.77 minutes
+		Max wait duration: 37.69 minutes
+		Average order size: 23.88 items
+		Average checkout duration: 2.92 minutes
+		Average checkout lane length: 5.07 customers in the lane before joining
+	
+	12 lanes, 2 express, 10 regular:
+		There were 3000 customers served.
+		There were 10 regular lanes and 2 express lanes, giving 12 total lanes open.
+
+		Average wait duration: 17.53 minutes
+		Average order size: 23.88 items
+		Average checkout duration: 3.00 minutes
+		Average checkout lane length: 7.02 customers in the lane before joining
+		
+	12 lanes, 4 express, 10 regular:
+		There were 3000 customers served.
+		There were 8 regular lanes and 4 express lanes, giving 12 total lanes open.
+
+		Average wait duration: 33.66 minutes
+		Average order size: 23.88 items
+		Average checkout duration: 2.91 minutes
+		Average checkout lane length: 10.09 customers in the lane before joining
+		
+	11 lanes, 3 express, 8 regular:
+		There were 3000 customers served.
+		There were 8 regular lanes and 3 express lanes, giving 11 total lanes open.
+
+		Average wait duration: 36.14 minutes
+		Average order size: 23.88 items
+		Average checkout duration: 2.92 minutes
+		Average checkout lane length: 11.38 customers in the lane before joining
+	
+	11 lanes, 2 express, 9 regular:
+		There were 3000 customers served.
+		There were 9 regular lanes and 2 express lanes, giving 11 total lanes open.
+
+		Average wait duration: 44.18 minutes
+		Average order size: 23.88 items
+		Average checkout duration: 2.99 minutes
+		Average checkout lane length: 15.89 customers in the lane before joining
+		
+	11 lanes, 4 express, 7 regular:
+		There were 3000 customers served.
+		There were 7 regular lanes and 4 express lanes, giving 11 total lanes open.
+
+		Average wait duration: 65.48 minutes
+		Average order size: 23.88 items
+		Average checkout duration: 2.91 minutes
+		Average checkout lane length: 18.44 customers in the lane before joining
