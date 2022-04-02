@@ -44,10 +44,6 @@ public class Customer implements Comparable<Customer> {
 
     /* Methods */
 
-    // public double getArrivalTime() {
-    //     return arrivalTime;
-    // }
-
     public int getItemCount() {
         return itemCount;
     }
