@@ -9,11 +9,15 @@ public class ExpressCheckout extends Checkout {
 
     /* Fields */
     private String name;
+    private int customerCount;
+    private int maxQueueSize;
 
     /* Constructor */
     public ExpressCheckout(String name) {
         super();
         this.name = name;
+        customerCount = 0;
+        maxQueueSize = 0;
     }
 
     /* Methods */
@@ -30,5 +34,34 @@ public class ExpressCheckout extends Checkout {
         // lane, minus one (to replicate example log data, likely intended to show how
         // many OTHER people are in the lane)
         return name + " (" + (size() - 1) + ")";
+    }
+
+    @Override
+    public void addCustomerCount() {
+        customerCount++;
+    }
+
+    @Override
+    public int getCustomerCount() {
+        return customerCount;
+    }
+
+    @Override
+    public void updateQueueSize() {
+        // If the current queue size is larger than the previous max, update it:
+        if (this.size() > maxQueueSize) {
+            maxQueueSize = this.size();
+        }
+    }
+
+    @Override
+    public int getMaxQueueSize() {
+        // Return the max queue size so far:
+        return maxQueueSize;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

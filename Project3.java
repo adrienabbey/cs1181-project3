@@ -195,6 +195,7 @@ class Project3 {
                     shortestLane.addLast(customer);
                     customer.setCheckoutLane(shortestLane);
                     customer.setCheckoutDuration(customer.getCheckoutLane().getCheckoutDuration(customer));
+                    customer.getCheckoutLane().updateQueueSize();
                 } else {
                     // Otherwise the customer must use a regular lane:
                     Checkout shortestLane = regularLanes.peek();
@@ -209,6 +210,7 @@ class Project3 {
                     shortestLane.addLast(customer);
                     customer.setCheckoutLane(shortestLane);
                     customer.setCheckoutDuration(customer.getCheckoutLane().getCheckoutDuration(customer));
+                    customer.getCheckoutLane().updateQueueSize();
                 }
 
                 // After adding the customer to a lane, check to see if the lane has another
@@ -254,19 +256,50 @@ class Project3 {
             }
         }
 
-        // Print out statistics for this simulation:
+        // Calculate statistics for this simulation:
+        int customersServed = 0;
         double avgWaitDuration = 0.0;
         double avgCheckoutDuration = 0.0;
         double avgOrderSize = 0.0;
         int customerCount = customerList.size();
+
+        // Gather statistics from each customer:
         for (Customer c : customerList) {
             avgWaitDuration += c.getWaitDuration();
             avgCheckoutDuration += c.getCheckoutDuration();
             avgOrderSize += c.getItemCount();
+            c.getCheckoutLane().addCustomerCount();
         }
-        System.out.println(String.format("Average order size: %.3f", (avgOrderSize / customerCount)));
-        System.out.println(String.format("Average checkout time: %.3f", (avgCheckoutDuration / customerCount)));
-        System.out.println(String.format("Average wait time: %.3f", (avgWaitDuration / customerCount)));
+
+        // Gather statistics from each lane:
+        for (Checkout c : expressLanes) {
+            customersServed += c.getCustomerCount();
+        }
+        for (Checkout c : regularLanes) {
+            customersServed += c.getCustomerCount();
+        }
+
+        // While I could just simply calculate the lane data using the existing
+        // variables, I feel it might be worthwhile to instead use other methods, as
+        // that might show any errors I might have in my code:
+        System.out.println();
+        System.out.println("There were " + customersServed + " customers served.");
+        System.out.println("There were " + regularLanes.size() + " regular lanes and " + expressLanes.size()
+                + " express lanes, giving " + (expressLanes.size() + regularLanes.size()) + " total lanes open.");
+        System.out.println();
+        System.out.println(String.format("Average wait duration: %.2f minutes", (avgWaitDuration / customerCount)));
+        System.out.println(String.format("Average order size: %.2f items", (avgOrderSize / customerCount)));
+        System.out.println(
+                String.format("Average checkout duration: %.2f minutes", (avgCheckoutDuration / customerCount)));
+        System.out.println();
+        for (Checkout c : regularLanes) {
+            System.out.println("    " + c.getName() + "'s number of customers served: " + c.getCustomerCount());
+            System.out.println("    " + c.getName() + "'s max queue size: " + c.getMaxQueueSize());
+        }
+        for (Checkout c : expressLanes) {
+            System.out.println("    " + c.getName() + "'s number of customers served: " + c.getCustomerCount());
+            System.out.println("    " + c.getName() + "'s max queue size: " + c.getMaxQueueSize());
+        }
     }
 
     private static ArrayList<Customer> loadCustomers(String fileName) {
